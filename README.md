@@ -1,9 +1,10 @@
 # laboratory
 ## open3d-example
-open3d-exampleにて  
+### ファイルの読み込み、書き込み
+open3d-example/input-outputにて  
 **ビルド**
 ```
-docker build -t open3d-example .
+docker build -t input-output .
 ```
 **実行**
 ```
