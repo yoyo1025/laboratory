@@ -25,6 +25,8 @@ mesh = (
         .remove_unreferenced_vertices()
 )
 
+simplifed_mesh = mesh.simplify_vertex_clustering(voxel_size=0.001)
+
 # 5. メッシュを書き出し
-o3d.io.write_triangle_mesh("output_mesh.ply", mesh)
+o3d.io.write_triangle_mesh("output_mesh5.ply", simplifed_mesh)
 print("✅ 点群から生成したメッシュを output_mesh.ply に保存しました")
