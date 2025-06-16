@@ -27,7 +27,7 @@ mesh = (
 )
 
 # --- 必要なら軽量化 --------------------------
-mesh = mesh.simplify_vertex_clustering(voxel_size=0.01)
+mesh = mesh.simplify_vertex_clustering(voxel_size=0.0025)
 
 o3d.io.write_triangle_mesh("clean_mesh.ply", mesh)
 print("✅ clean_mesh.ply を出力しました")
