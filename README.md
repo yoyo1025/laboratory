@@ -11,11 +11,22 @@ docker build -t input-output .
 docker run --rm -v "$PWD:/app" open3d-example
 ```
 
-### ファイルの読み込み、書き込み
+### メッシュ化
 open3d-example/meshにて  
 **ビルド**
 ```
 docker build -t mesh .
+```
+**実行**
+```
+docker run --rm -v "$PWD:/app" open3d-example
+```
+
+### ICPによる位置合わせ
+open3d-example/meshにて  
+**ビルド**
+```
+docker build -t icp .
 ```
 **実行**
 ```
