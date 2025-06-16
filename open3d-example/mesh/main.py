@@ -1,23 +1,24 @@
 import open3d as o3d
+import numpy as np
 
-# 1. 点群を読み込む
-pcd = o3d.io.read_point_cloud("input.pcd")     # .pcd や 点群 .ply
+pcd = o3d.io.read_point_cloud("input.pcd")
 
-# 2. 法線推定（半径や近傍点数は点群密度に応じて調整）
+# --- 法線推定と向き揃え ----------------------
 pcd.estimate_normals(
-    search_param=o3d.geometry.KDTreeSearchParamHybrid(
-        radius=0.02,       # 近傍探索半径 [m]
-        max_nn=30          # 近傍点数
-    )
+    search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.05, max_nn=30)
 )
+pcd.orient_normals_consistent_tangent_plane(k=30)
 
-# 3. ポアソン再構成でメッシュ化
+# --- Poisson 再構成 --------------------------
 mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
-    pcd,
-    depth=9               # 解像度（深いほど細かい）
+    pcd, depth=9
 )
 
-# 4. 後処理（重複除去・小さな三角形除去など）
+# --- 低密度頂点を除去 ------------------------
+densities = np.asarray(densities)
+th = np.quantile(densities, 0.025)   # 下位 2.5% をカット
+mesh.remove_vertices_by_mask(densities < th)
+
 mesh = (
     mesh.remove_duplicated_vertices()
         .remove_degenerate_triangles()
@@ -25,8 +26,9 @@ mesh = (
         .remove_unreferenced_vertices()
 )
 
-simplifed_mesh = mesh.simplify_vertex_clustering(voxel_size=0.001)
+# --- 必要なら軽量化 --------------------------
+mesh = mesh.simplify_vertex_clustering(voxel_size=0.01)
 
-# 5. メッシュを書き出し
-o3d.io.write_triangle_mesh("output_mesh5.ply", simplifed_mesh)
-print("✅ 点群から生成したメッシュを output_mesh.ply に保存しました")
+o3d.io.write_triangle_mesh("clean_mesh.ply", mesh)
+print("✅ clean_mesh.ply を出力しました")
+
