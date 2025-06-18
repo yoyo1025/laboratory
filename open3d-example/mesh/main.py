@@ -1,7 +1,7 @@
 import open3d as o3d
 import numpy as np
 
-pcd = o3d.io.read_point_cloud("input.pcd")
+pcd = o3d.io.read_point_cloud("input.ply")
 
 # --- 法線推定と向き揃え ----------------------
 pcd.estimate_normals(
@@ -16,7 +16,7 @@ mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
 
 # --- 低密度頂点を除去 ------------------------
 densities = np.asarray(densities)
-th = np.quantile(densities, 0.025)   # 下位 2.5% をカット
+th = np.quantile(densities, 0.02)   # 下位 2.0% をカット
 mesh.remove_vertices_by_mask(densities < th)
 
 mesh = (
@@ -29,8 +29,7 @@ mesh = (
 
 
 # --- 必要なら軽量化 --------------------------
-mesh = mesh.simplify_vertex_clustering(voxel_size=0.0025)
+mesh = mesh.simplify_vertex_clustering(voxel_size=0.02282)
 
 o3d.io.write_triangle_mesh("clean_mesh.ply", mesh)
 print("✅ clean_mesh.ply を出力しました")
-
