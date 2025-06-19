@@ -64,7 +64,3 @@ src_aligned = copy.deepcopy(src_raw).transform(result_icp.transformation)
 merged = tgt_raw + src_aligned
 o3d.io.write_point_cloud("bunny12_icp_merged.ply", merged)
 print("→ bunny12_icp_merged.ply を保存しました")
-
-# （任意）結果を可視化
-o3d.visualization.draw_geometries([tgt_raw, src_aligned],
-                                  window_name="Bunny1 (Orange) + Bunny2 (Cyan)")
