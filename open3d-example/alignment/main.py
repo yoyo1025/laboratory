@@ -29,6 +29,7 @@ def preprocess(pcd):
 src = preprocess(src_raw)
 tgt = preprocess(tgt_raw)
 
+# RANSACのための準備 対応候補点を解析
 src_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
     src, o3d.geometry.KDTreeSearchParamHybrid(radius = VOXEL*5, max_nn = 100))
 tgt_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
