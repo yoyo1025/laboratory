@@ -7,6 +7,8 @@ pcd = o3d.io.read_point_cloud("input.ply")
 pcd.estimate_normals(
     search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.05, max_nn=30)
 )
+
+# --- 法線ベクトルと正規化  ---
 pcd.orient_normals_consistent_tangent_plane(k=30)
 
 # --- Poisson 再構成 --------------------------
