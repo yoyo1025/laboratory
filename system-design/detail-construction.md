@@ -1,39 +1,45 @@
 ```mermaid
 sequenceDiagram
-    participant ユーザ
-    participant エッジサーバ
-    participant エッジDB
-    participant クラウドサーバ
-    participant クラウドDB
+    participant User        as ユーザ
+    participant EdgeSrv    as エッジサーバ
+    participant EdgeDB      as エッジDB
+    participant CloudSrv    as クラウドサーバ
+    participant CloudDB     as クラウドDB
 
-    ユーザ->>エッジサーバ:位置情報と点群を送信する
-    エッジサーバ->>エッジサーバ: Geohashを算出する
-    エッジサーバ->>エッジサーバ: 点群から外れ値除去を行う
-    エッジサーバ->>エッジDB: 同一区画のデータの有無を確認する
-    エッジDB-->>エッジサーバ: レスポンスを返却する
-    alt 同区画で点群を採集済み
-        エッジサーバ->>エッジサーバ: 重複率計算する
-        エッジサーバ->>エッジサーバ: 位置合わせとマージを行う
-        エッジサーバ->>エッジDB: Geohasをもとに保存する
-        エッジDB-->>エッジサーバ: レスポンスを返却する
-        alt 重複率が75%未満
-            エッジサーバ->>エッジサーバ: ダウンサンプリング
-            エッジサーバ->>クラウドサーバ: 点群とGeohashを送信する
-            クラウドサーバ->>クラウドDB: Geohashをもとに保存する
-            クラウドDB-->>クラウドサーバ: レスポンスを返却する
-            クラウドサーバ-->>エッジサーバ: レスポンスを返却する
-            エッジサーバ-->>ユーザ: 構築完了通知
-        else 重複率が75%以上
-            エッジサーバ-->>ユーザ: 構築完了通知
+    User->>EdgeSrv: 点群・位置送信
+
+    EdgeSrv->>EdgeSrv: GeoHash8 計算
+    EdgeSrv->>EdgeSrv: 外れ値除去
+
+    EdgeSrv->>EdgeDB: SELECT count(*) WHERE geohash8 = ?
+    EdgeDB-->>EdgeSrv: 既存点数 N
+
+    alt 既存データあり
+        EdgeSrv->>EdgeSrv: 位置合わせ
+        EdgeSrv->>EdgeSrv: 重複率計算
+        EdgeSrv->>EdgeSrv: マージ & ダウンサンプリング
+        EdgeSrv->>EdgeDB: INSERT／UPDATE pc_patch
+
+        alt 重複率 < 75%
+            par クラウド同期
+                EdgeSrv->>CloudSrv: pc_patch + metadata
+                CloudSrv->>CloudDB: UPSERT pc_patch
+            and メッシュ生成
+                EdgeSrv->>EdgeSrv: Poisson メッシュ生成
+            end
+            EdgeSrv-->>User: 構築完了
+        else 重複率 >= 75%
+            EdgeSrv-->>User: 高重複率のため送信スキップ
         end
-    else 初めての採集
-        エッジサーバ->>エッジDB: Geohashをもとに保存
-        エッジDB-->>エッジサーバ: レスポンスを返却する
-        エッジサーバ->>エッジサーバ: ダウンサンプリング
-        エッジサーバ->>クラウドサーバ: 点群とGeohashを送信する
-        クラウドサーバ-->>クラウドDB: Geohashをもとに保存
-        クラウドDB-->>クラウドサーバ: レスポンスを返却する
-        クラウドサーバ-->>エッジサーバ: レスポンスを返却する
-        エッジサーバ-->>ユーザ: 構築完了通知
+    else 新規データ
+        EdgeSrv->>EdgeSrv: ダウンサンプリング
+        EdgeSrv->>EdgeDB: INSERT pc_patch
+         par クラウド同期
+                EdgeSrv->>CloudSrv: pc_patch + metadata
+                CloudSrv->>CloudDB: INSERT pc_patch
+            and メッシュ生成
+                EdgeSrv->>EdgeSrv: Poisson メッシュ生成
+            end
+        EdgeSrv-->>User: 構築完了
     end
 ```
