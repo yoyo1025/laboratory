@@ -25,7 +25,7 @@ sequenceDiagram
                 EdgeSrv->>CloudSrv: pc_patch + metadata
                 CloudSrv->>CloudDB: UPSERT pc_patch
             and メッシュ生成
-                EdgeSrv->>EdgeSrv: Poisson メッシュ生成
+                EdgeSrv->>EdgeSrv: メッシュ生成
             end
             EdgeSrv-->>User: 構築完了
         else 重複率 >= 75%
@@ -38,7 +38,7 @@ sequenceDiagram
                 EdgeSrv->>CloudSrv: pc_patch + metadata
                 CloudSrv->>CloudDB: INSERT pc_patch
             and メッシュ生成
-                EdgeSrv->>EdgeSrv: Poisson メッシュ生成
+                EdgeSrv->>EdgeSrv: メッシュ生成
             end
         EdgeSrv-->>User: 構築完了
     end
