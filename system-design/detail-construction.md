@@ -15,13 +15,14 @@ sequenceDiagram
     EdgeDB-->>EdgeSrv: 既存点数 N
 
     alt 既存データあり
-        EdgeSrv->>EdgeSrv: 位置合わせ
+        EdgeSrv->>EdgeDB: 同一区画の最新点群データを要求
+        EdgeDB-->>EdgeSrv: 返却
         EdgeSrv->>EdgeSrv: 重複率計算
-        EdgeSrv->>EdgeSrv: マージ & ダウンサンプリング
         EdgeSrv->>EdgeDB: INSERT／UPDATE pc_patch
 
         alt 重複率 < 75%
             par クラウド同期
+                EdgeSrv->>EdgeSrv: ダウンサンプリング
                 EdgeSrv->>CloudSrv: pc_patch + Geohash
                 CloudSrv->>CloudDB: UPSERT pc_patch
             and メッシュ生成
@@ -32,9 +33,9 @@ sequenceDiagram
             EdgeSrv-->>User: 高重複率のため送信スキップ
         end
     else 新規データ
-        EdgeSrv->>EdgeSrv: ダウンサンプリング
         EdgeSrv->>EdgeDB: INSERT pc_patch
          par クラウド同期
+                EdgeSrv->>EdgeSrv: ダウンサンプリング
                 EdgeSrv->>CloudSrv: pc_patch + Geohash
                 CloudSrv->>CloudDB: INSERT pc_patch
             and メッシュ生成
