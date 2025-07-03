@@ -22,7 +22,7 @@ sequenceDiagram
 
         alt 重複率 < 75%
             par クラウド同期
-                EdgeSrv->>CloudSrv: pc_patch + metadata
+                EdgeSrv->>CloudSrv: pc_patch + Geohash
                 CloudSrv->>CloudDB: UPSERT pc_patch
             and メッシュ生成
                 EdgeSrv->>EdgeSrv: メッシュ生成
@@ -35,7 +35,7 @@ sequenceDiagram
         EdgeSrv->>EdgeSrv: ダウンサンプリング
         EdgeSrv->>EdgeDB: INSERT pc_patch
          par クラウド同期
-                EdgeSrv->>CloudSrv: pc_patch + metadata
+                EdgeSrv->>CloudSrv: pc_patch + Geohash
                 CloudSrv->>CloudDB: INSERT pc_patch
             and メッシュ生成
                 EdgeSrv->>EdgeSrv: メッシュ生成
