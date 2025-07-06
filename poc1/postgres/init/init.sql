@@ -1,33 +1,47 @@
--- 1) PointCloud / PostGIS 拡張を先に作成
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pointcloud;
 CREATE EXTENSION IF NOT EXISTS pointcloud_postgis;
 
--- 2) PCID=1 のスキーマを登録
--- 古い行を削除
-DELETE FROM pointcloud_formats WHERE pcid = 1;
-
--- 正しいスキーマ（position 0-2, size 8 byte, double）
-INSERT INTO pointcloud_formats (pcid, srid, schema)
-VALUES (
-  1, 4326,
-  '<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC">
-    <pc:dimension><pc:position>0</pc:position><pc:size>8</pc:size><pc:name>X</pc:name><pc:interpretation>double</pc:interpretation></pc:dimension>
-    <pc:dimension><pc:position>1</pc:position><pc:size>8</pc:size><pc:name>Y</pc:name><pc:interpretation>double</pc:interpretation></pc:dimension>
-    <pc:dimension><pc:position>2</pc:position><pc:size>8</pc:size><pc:name>Z</pc:name><pc:interpretation>double</pc:interpretation></pc:dimension>
-  </pc:PointCloudSchema>'
-);
+INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (1, 4326,
+'<?xml version="1.0" encoding="UTF-8"?>
+<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC/1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <pc:dimension>
+    <pc:position>1</pc:position>
+    <pc:size>3</pc:size>
+    <pc:description>X coordinate as a long integer. You must use the
+                    scale and offset information of the header to
+                    determine the double value.</pc:description>
+    <pc:name>X</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>2</pc:position>
+    <pc:size>3</pc:size>
+    <pc:description>Y coordinate as a long integer. You must use the
+                    scale and offset information of the header to
+                    determine the double value.</pc:description>
+    <pc:name>Y</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>3</pc:position>
+    <pc:size>3</pc:size>
+    <pc:description>Z coordinate as a long integer. You must use the
+                    scale and offset information of the header to
+                    determine the double value.</pc:description>
+    <pc:name>Z</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+  </pc:dimension>
+  <pc:metadata>
+    <Metadata name="compression">dimensional</Metadata>
+  </pc:metadata>
+</pc:PointCloudSchema>');
 
 CREATE TABLE IF NOT EXISTS pc_data (
-  ts        timestamptz NOT NULL,
-  geohash8  char(8)     NOT NULL,
-  patch     pcpatch,
+  ts timestamptz NOT NULL,
+  geohash8 char(8) NOT NULL,
+  patch pcpatch,
   point_cnt int,
   PRIMARY KEY (ts, geohash8)
-) PARTITION BY RANGE (ts);
-
--- 2025-07 のパーティション例
-CREATE TABLE IF NOT EXISTS pc_data_2025_07
-  PARTITION OF pc_data
-  FOR VALUES FROM ('2025-07-01') TO ('2025-08-01');
-
+);  -- ★パーティションを切らず親1つだけ
