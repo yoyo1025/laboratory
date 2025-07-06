@@ -1,2 +1,7 @@
 fastapi
 uvicorn
+psycopg2-binary
+numpy
+open3d==0.18.0      # headless ビルド
+pygeohash           # GeoHash
+python-multipart
