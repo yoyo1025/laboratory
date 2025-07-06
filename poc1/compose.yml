@@ -14,8 +14,9 @@ services:
     image: pgpointcloud/pointcloud:latest
     environment:
       - POSTGRES_DB=pointclouds
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=mysecretpassword
     ports:
-      - "5643:5643"
+      - "5432:5432"
     volumes:
       - ./postgres/init:/docker-entrypoint-initdb.d
