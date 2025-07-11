@@ -1,21 +1,14 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from pydantic import BaseModel
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
 import pygeohash
+from response import upload_response
 
 # Geohashの桁数
 GEOHASH_LEVEL = 8
 
 app = FastAPI()
-
-class UploadResponse(BaseModel):
-    filename: str
-    lat: str
-    lon: str
-    geohash: str
-    saved_path: str
 
 ALLOWED_EXT = {".ply"}
 APP_ROOT = Path(__file__).resolve().parent
@@ -24,7 +17,7 @@ APP_ROOT = Path(__file__).resolve().parent
 def health():
     return {"Hello": "World"}
 
-@app.post("/upload", response_model=UploadResponse)
+@app.post("/upload", response_model=upload_response.UploadResponse)
 async def upload(file: UploadFile = File(...), lat: str = Form(), lon: str = Form()):
     # ファイル拡張子チェック
     ext = Path(file.filename).suffix.lower()
