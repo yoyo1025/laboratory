@@ -1,10 +1,38 @@
-version: "3.0"
-
+version: "3.8"
 services:
   api:
-    container_name: "api"
     build: .
+    container_name: api
     volumes:
-      - "./app:/app"
+      - ./app:/app
     ports:
-      - 8000:8000
+      - "8000:8000"
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_poc1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      MYSQL_DATABASE: app_database
+      TZ: Asia/Tokyo
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_poc1
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - mysql
+    ports:
+      - "8082:80"
+volumes:
+  mysql_data:
