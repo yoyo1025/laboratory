@@ -1,34 +1,40 @@
-version: "3.8"
 services:
   api:
     build: .
-    container_name: api
+    container_name: "api"
     volumes:
       - ./app:/app
     ports:
       - "8000:8000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
   mysql:
-    image: mysql:8.0
+    image: "mysql:8.0"
+    container_name: "mysql_poc1"
     environment:
-      MYSQL_DATABASE: sample_db
-      MYSQL_USER: sample_user
-      MYSQL_PASSWORD: sample_password
-      MYSQL_ROOT_PASSWORD: p@assw0rd
-      TZ: Asia/Tokyo
+      MYSQL_DATABASE: "sample_db"
+      MYSQL_USER: "sample_user"
+      MYSQL_PASSWORD: "sample_password"
+      MYSQL_ROOT_PASSWORD: "p@assw0rd"
+      TZ: "Asia/Tokyo"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin_poc1
+    image: "phpmyadmin/phpmyadmin"
+    container_name: "phpmyadmin_poc1"
     environment:
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: p@assw0rd
+      PMA_HOST: "mysql"
+      PMA_USER: "root"
+      PMA_PASSWORD: "p@assw0rd"
     depends_on:
       - mysql
     ports:
