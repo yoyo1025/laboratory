@@ -10,7 +10,9 @@ GEOHASH_LEVEL = 8
 
 app = FastAPI()
 
+# 拡張子指定
 ALLOWED_EXT = {".ply"}
+# プロジェクトルートパス指定
 APP_ROOT = Path(__file__).resolve().parent
 
 @app.get("/health")

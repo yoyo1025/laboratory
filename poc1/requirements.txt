@@ -6,3 +6,4 @@ open3d==0.18.0      # headless ビルド
 pygeohash           # GeoHash
 python-multipart
 pydantic
+mysql-connector-python
