@@ -11,12 +11,11 @@ services:
       - mysql
   mysql:
     image: mysql:8.0
-    container_name: mysql_poc1
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: docker
-      MYSQL_PASSWORD: docker
-      MYSQL_DATABASE: app_database
+      MYSQL_DATABASE: sample_db
+      MYSQL_USER: sample_user
+      MYSQL_PASSWORD: sample_password
+      MYSQL_ROOT_PASSWORD: p@assw0rd
       TZ: Asia/Tokyo
     volumes:
       - mysql_data:/var/lib/mysql
@@ -29,7 +28,7 @@ services:
     environment:
       PMA_HOST: mysql
       PMA_USER: root
-      PMA_PASSWORD: root
+      PMA_PASSWORD: p@assw0rd
     depends_on:
       - mysql
     ports:
