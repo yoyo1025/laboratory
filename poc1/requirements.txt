@@ -7,3 +7,5 @@ pygeohash           # GeoHash
 python-multipart
 pydantic
 mysql-connector-python
+sqlalchemy
+mysqlclient
