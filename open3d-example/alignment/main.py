@@ -7,8 +7,8 @@ DIST_RANSAC = VOXEL * 2.0       # RANSAC 対応距離（10cm）
 DIST_ICP    = VOXEL * 0.5       # ICP   対応距離（2.5cm）
 
 # ---------------- 1. 点群の読み込み ----------------
-room1_raw = o3d.io.read_point_cloud("test3.ply")
-room2_raw = o3d.io.read_point_cloud("test4.ply")
+room1_raw = o3d.io.read_point_cloud("test1.ply")
+room2_raw = o3d.io.read_point_cloud("test2.ply")
 
 # ---------------- 2. 前処理関数 --------------------
 def preprocess(pcd):
