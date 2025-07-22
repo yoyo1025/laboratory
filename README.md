@@ -46,3 +46,18 @@ docker build -t duplication .
 ```
 docker run --rm -v "$PWD:/app" duplication
 ```
+
+### 差分抽出
+
+open3d-example/subtraction にて
+**ビルド**
+
+```
+docker build -t subtraction .
+```
+
+**実行**
+
+```
+docker run --rm -v "$PWD:/app" subtraction
+```
