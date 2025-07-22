@@ -14,7 +14,7 @@ docker build -t mesh .
 **実行**
 
 ```
-docker run --rm -v "$PWD:/app" open3d-example
+docker run --rm -v "$PWD:/app" mesh
 ```
 
 ### ICP による位置合わせ
@@ -29,5 +29,20 @@ docker build -t alignment .
 **実行**
 
 ```
-docker run --rm -v "$PWD:/app" open3d-example
+docker run --rm -v "$PWD:/app" alignment
+```
+
+### 重複率計算
+
+open3d-example/duplication にて
+**ビルド**
+
+```
+docker build -t duplication .
+```
+
+**実行**
+
+```
+docker run --rm -v "$PWD:/app" duplication
 ```
