@@ -1,23 +1,17 @@
-# 1) ベースイメージ
-FROM python:3.12-slim
+FROM ubuntu:22.04
 
-# 2) 必要な OS パッケージ
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libgl1 \
-        libgomp1 \   
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1 \
+    OMP_NUM_THREADS=1
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    python3-pip libegl1 libgl1 libgomp1 libx11-6 \
     && rm -rf /var/lib/apt/lists/*
 
-# 3) 作業ディレクトリ
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir "numpy==1.26.*" "open3d==0.18.*"
+
 WORKDIR /app
-
-# 4) 依存関係
-COPY requirements.txt ./
-
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# 5) アプリ本体
 COPY . .
-
-# 6) デフォルトコマンド（GUI は開かない想定）
-CMD ["python", "main.py", "--no-view"]
+CMD ["python3", "-u", "main.py"]
