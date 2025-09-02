@@ -2,8 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    PYTHONFAULTHANDLER=1 \
-    OMP_NUM_THREADS=1
+    PYTHONFAULTHANDLER=1 
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-pip libegl1 libgl1 libgomp1 libx11-6 \

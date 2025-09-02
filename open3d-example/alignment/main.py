@@ -57,8 +57,8 @@ print("RMSE          :", result_icp.inlier_rmse)
 # ---------------- 6. 変換＆マージ ---------------------
 room1_aligned = copy.deepcopy(room1_raw).transform(result_icp.transformation)
 merged = room2_raw + room1_aligned
-o3d.io.write_point_cloud("merged_geohash_7.ply", merged)
-print("→ merged_geohash_7.ply を保存しました")
+o3d.io.write_point_cloud("merged_geohash_8.ply", merged)
+print("→ merged_geohash_8.ply を保存しました")
 
 end = time.time()
 time_diff = end - start
