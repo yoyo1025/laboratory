@@ -149,7 +149,7 @@ MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
 mc = Minio(MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, secure=MINIO_SECURE)    
     
 @app.post("/minio/webhook")
-async def minio_webhook(request: Request):
+async def PCLocalAlignmentHandler(request: Request):
     # Webhook通知のリクエストボディを JSON として取得
     body = await request.json()
     # body が辞書型なら Rcords を取り出す
