@@ -171,18 +171,18 @@ async def minio_webhook(request: Request):
         key = unquote(key)
         
         # PUT系イベント かつ .txt ファイルだけを対象にする
-        if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".txt"):
+        if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply"):
             continue
 
         # MinIO から対象オブジェクトを取得
-        resp = mc.get_object(bucket, key)
+        pc = mc.get_object(bucket, key)
         try:
              # ファイル内容を文字列として読み出し、ログに出力
-            text = resp.read().decode("utf-8", errors="replace")
+            text = pc.read().decode("utf-8", errors="replace")
             logger.info(f"[MinIO] {bucket}/{key}\n{text}")
         finally:
             # 接続を開放
-            resp.close(); resp.release_conn()
+            pc.close(); pc.release_conn()
         handled += 1
 
     return {"ok": True, "handled": handled}
