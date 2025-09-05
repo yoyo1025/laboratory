@@ -17,6 +17,9 @@ from fastapi.encoders import jsonable_encoder
 from urllib.parse import unquote
 import logging
 from minio import Minio
+from usecase.aligmnent_usecase import AligmentUsecase  
+import tempfile
+import open3d as o3d
 
 # Geohashの桁数
 GEOHASH_LEVEL = 8
@@ -170,19 +173,25 @@ async def PCLocalAlignmentHandler(request: Request):
         # URLエンコードされている場合に備えてデコード 
         key = unquote(key)
         
-        # PUT系イベント かつ .txt ファイルだけを対象にする
+        # PUT系イベント かつ .ply ファイルだけを対象にする
         if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply"):
             continue
-
-        # MinIO から対象オブジェクトを取得
-        pc = mc.get_object(bucket, key)
+        
+        # 点軍データを一時ファイルとしてopen3dに渡す
+        suffix = os.path.splitext(key)[1] or ".ply"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tf:
+            tmp = tf.name
         try:
-             # ファイル内容を文字列として読み出し、ログに出力
-            text = pc.read().decode("utf-8", errors="replace")
-            logger.info(f"[MinIO] {bucket}/{key}\n{text}")
+            mc.fget_object(bucket, key, tmp)
+            pc = o3d.io.read_point_cloud(tmp)
         finally:
-            # 接続を開放
-            pc.close(); pc.release_conn()
+            try:
+                os.remove(tmp)
+            except FileNotFoundError:
+                pass
+            
+        # 位置合わせ処理
+        AligmentUsecase(pc, mc).excute()
         handled += 1
 
     return {"ok": True, "handled": handled}
