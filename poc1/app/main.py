@@ -150,29 +150,38 @@ mc = Minio(MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, secure=MINIO_SECU
     
 @app.post("/minio/webhook")
 async def minio_webhook(request: Request):
+    # Webhook通知のリクエストボディを JSON として取得
     body = await request.json()
-    logger.info(body)
+    # body が辞書型なら Rcords を取り出す
     records = body.get("Records", [body]) if isinstance(body, dict) else []
-
-    handled = 0
+    
+    handled = 0 # 取得したファイル数をカウント
     for rec in records:
+        # S3 オブジェクト情報を取り出す
         s3 = rec.get("s3", {})
         bucket = s3.get("bucket", {}).get("name")
         key = s3.get("object", {}).get("key")
         event = rec.get("eventName", "")
 
+        # バケット名やキーが無い場合はスキップ
         if not bucket or not key:
             continue
 
+        # URLエンコードされている場合に備えてデコード 
         key = unquote(key)
+        
+        # PUT系イベント かつ .txt ファイルだけを対象にする
         if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".txt"):
             continue
 
+        # MinIO から対象オブジェクトを取得
         resp = mc.get_object(bucket, key)
         try:
+             # ファイル内容を文字列として読み出し、ログに出力
             text = resp.read().decode("utf-8", errors="replace")
             logger.info(f"[MinIO] {bucket}/{key}\n{text}")
         finally:
+            # 接続を開放
             resp.close(); resp.release_conn()
         handled += 1
 
