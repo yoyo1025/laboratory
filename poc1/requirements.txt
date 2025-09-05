@@ -9,3 +9,4 @@ pydantic
 mysql-connector-python
 sqlalchemy
 mysqlclient
+minio

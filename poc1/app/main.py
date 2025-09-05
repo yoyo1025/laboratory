@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, UploadFile, File, Form, Query, HTTPException, status
+from fastapi import Depends, FastAPI, Request, UploadFile, File, Form, Query, HTTPException, status
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -14,11 +14,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import FetchedValue
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from urllib.parse import unquote
+import logging
+from minio import Minio
 
 # Geohashの桁数
 GEOHASH_LEVEL = 8
 
 app = FastAPI()
+logger = logging.getLogger("uvicorn")
+logger.setLevel(logging.INFO)
 
 # 拡張子指定
 ALLOWED_EXT = {".ply"}
@@ -134,3 +139,41 @@ async def upload(file: UploadFile = File(...), lat: str = Form(), lon: str = For
         "geohash": geohash,
         "saved_path": str(save_path.relative_to(APP_ROOT))
     }
+    
+    
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio_root")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio_password")
+MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
+    
+mc = Minio(MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, secure=MINIO_SECURE)    
+    
+@app.post("/minio/webhook")
+async def minio_webhook(request: Request):
+    body = await request.json()
+    logger.info(body)
+    records = body.get("Records", [body]) if isinstance(body, dict) else []
+
+    handled = 0
+    for rec in records:
+        s3 = rec.get("s3", {})
+        bucket = s3.get("bucket", {}).get("name")
+        key = s3.get("object", {}).get("key")
+        event = rec.get("eventName", "")
+
+        if not bucket or not key:
+            continue
+
+        key = unquote(key)
+        if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".txt"):
+            continue
+
+        resp = mc.get_object(bucket, key)
+        try:
+            text = resp.read().decode("utf-8", errors="replace")
+            logger.info(f"[MinIO] {bucket}/{key}\n{text}")
+        finally:
+            resp.close(); resp.release_conn()
+        handled += 1
+
+    return {"ok": True, "handled": handled}
