@@ -3,6 +3,8 @@ import open3d as o3d
 import time
 import tempfile, os
 import numpy as np
+import pygeohash
+import re
 
 base_data_bucket = "local-point-cloud/base-data"
 base_data_key = "geohash-level8.ply"
@@ -19,8 +21,21 @@ class AligmentUsecase:
     p = pc.voxel_down_sample(VOXEL)
     p.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*2, max_nn=30))
     return p
+  
+  # pcのオブジェクトキー名からgeohashを計算する
+  def calc_geohash(self, key: str) -> str:
+    # x-34-70011159734301-y-137-73557007483018-8.ply のような形式でkeyが与えられる
+    m = re.fullmatch(r"x([-+]?)(\d+)-(\d+)-y([-+]?)(\d+)-(\d+)-(\d+)\.ply", key)
+    if m:
+        # 符号は無視（absで常に正に）
+        x = abs(float(f"{m.group(2)}.{m.group(3)}"))
+        y = abs(float(f"{m.group(5)}.{m.group(6)}"))
+        level = int(m.group(7))
+        print(f"INFO:  extracted from key: x={x}, y={y}, level={level}")
+        geohash = pygeohash.encode(latitude=x, longitude=y, precision=level )
+        return geohash
     
-  def excute(self):
+  def excute(self, key: str):
     start = time.time() 
 
     # 「bucket/key」の与え方を壊さないための最小対応：
@@ -45,7 +60,10 @@ class AligmentUsecase:
         os.remove(tmp_in)
       except FileNotFoundError:
         pass
-    
+      
+    geohash = self.calc_geohash(key)
+    print(geohash)
+  
     # base_pc（ベース点群）と merge_pc（マージ点群）をダウンサンプリング
     base_pc_preprocessed = self.preprocess(base_pc)
     merge_pc_preprocessed = self.preprocess(self.merge_pc)

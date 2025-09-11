@@ -190,8 +190,10 @@ async def PCLocalAlignmentHandler(request: Request):
             except FileNotFoundError:
                 pass
             
+        print("INFO:  bucket name: ", bucket)
+        print("INFO:  object key: ", key)
         # 位置合わせ処理
-        AligmentUsecase(pc, mc).excute()
+        AligmentUsecase(pc, mc).excute(key)
         handled += 1
 
     return {"ok": True, "handled": handled}
