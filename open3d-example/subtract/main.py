@@ -1,17 +1,14 @@
 import open3d as o3d
-import copy
-import time
-
-start = time.time() 
+import numpy as np
 
 # ---------------- 0. パラメータ設定 ----------------
-VOXEL = 0.1                    # 10cm
-DIST_RANSAC = VOXEL * 1.0       # RANSAC 対応距離（10cm）
-DIST_ICP    = VOXEL * 0.5       # ICP   対応距離（5cm）
+VOXEL = 0.05                    # 5 cm（部屋スケール）
+DIST_RANSAC = VOXEL * 2.0       # RANSAC 対応距離（10cm）
+DIST_ICP    = VOXEL * 0.5       # ICP   対応距離（2.5cm）
 
 # ---------------- 1. 点群の読み込み ----------------
-room1_raw = o3d.io.read_point_cloud("geohash-level8.ply")
-room2_raw = o3d.io.read_point_cloud("geohash-level8-cutted.ply")
+room1_raw = o3d.io.read_point_cloud("test1.ply")
+room2_raw = o3d.io.read_point_cloud("test2.ply")
 
 # ---------------- 2. 前処理関数 --------------------
 def preprocess(pcd):
@@ -51,15 +48,20 @@ result_icp = o3d.pipelines.registration.registration_icp(
     init=result_ransac.transformation,
     estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPlane()
 )
-print("ICP fitness   :", result_icp.fitness)
-print("RMSE          :", result_icp.inlier_rmse)
 
-# ---------------- 6. 変換＆マージ ---------------------
-room1_aligned = copy.deepcopy(room1_raw).transform(result_icp.transformation)
-merged = room2_raw + room1_aligned
-o3d.io.write_point_cloud("merged_geohash_8.ply", merged)
-print("→ merged_geohash_8.ply を保存しました")
+T = result_icp.transformation
+# ---------- 5. 元のAに変換行列を適用（高密度なまま） ----------
+pcd_A_aligned = room1_raw.transform(T)
 
-end = time.time()
-time_diff = end - start
-print(time_diff) 
+# ---------- 6. 最近傍距離による差集合抽出 ----------
+dists = room1_raw.compute_point_cloud_distance(room2_raw)
+dists = np.asarray(dists)
+d_th = 0.05  # 2cm以上離れていたら「差分」とみなす
+mask = dists > d_th
+pcd_diff = room1_raw.select_by_index(np.where(mask)[0])
+
+# ---------- 7. 可視化・保存 ----------
+pcd_diff.paint_uniform_color([1, 0, 0])  # 差分を赤で
+o3d.visualization.draw_geometries([room2_raw, pcd_diff], window_name="差分 (A - B)")
+
+o3d.io.write_point_cloud("A_minus_B.ply", pcd_diff)

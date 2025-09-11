@@ -1,17 +1,14 @@
 import open3d as o3d
 import copy
-import time
-
-start = time.time() 
 
 # ---------------- 0. パラメータ設定 ----------------
-VOXEL = 0.1                    # 10cm
-DIST_RANSAC = VOXEL * 1.0       # RANSAC 対応距離（10cm）
-DIST_ICP    = VOXEL * 0.5       # ICP   対応距離（5cm）
+VOXEL = 0.05                    # 5 cm（部屋スケール）
+DIST_RANSAC = VOXEL * 2.0       # RANSAC 対応距離（10cm）
+DIST_ICP    = VOXEL * 0.5       # ICP   対応距離（2.5cm）
 
 # ---------------- 1. 点群の読み込み ----------------
-room1_raw = o3d.io.read_point_cloud("geohash-level8.ply")
-room2_raw = o3d.io.read_point_cloud("geohash-level8-cutted.ply")
+room1_raw = o3d.io.read_point_cloud("test2.ply")
+room2_raw = o3d.io.read_point_cloud("test4.ply")
 
 # ---------------- 2. 前処理関数 --------------------
 def preprocess(pcd):
@@ -51,15 +48,15 @@ result_icp = o3d.pipelines.registration.registration_icp(
     init=result_ransac.transformation,
     estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPlane()
 )
-print("ICP fitness   :", result_icp.fitness)
-print("RMSE          :", result_icp.inlier_rmse)
 
-# ---------------- 6. 変換＆マージ ---------------------
-room1_aligned = copy.deepcopy(room1_raw).transform(result_icp.transformation)
-merged = room2_raw + room1_aligned
-o3d.io.write_point_cloud("merged_geohash_8.ply", merged)
-print("→ merged_geohash_8.ply を保存しました")
+## ここまでは位置合わせのコードとほぼ同じ？
 
-end = time.time()
-time_diff = end - start
-print(time_diff) 
+T = result_icp.transformation
+
+d_th = VOXEL * 1.5
+eval_res = o3d.pipelines.registration.evaluate_registration(
+    room1_raw, room2_raw, d_th, T
+)
+
+print(f"Overlap(fitness): {eval_res.fitness:.3f}")
+print(f"Inlier RMSE    : {eval_res.inlier_rmse:.4f} m")
