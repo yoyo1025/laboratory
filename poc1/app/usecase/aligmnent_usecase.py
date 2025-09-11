@@ -63,7 +63,6 @@ class AligmentUsecase:
         pass
       
     geohash = self.calc_geohash(key)
-    print(geohash)
   
     # base_pc（ベース点群）と merge_pc（マージ点群）をダウンサンプリング
     base_pc_preprocessed = self.preprocess(base_pc)
@@ -111,8 +110,6 @@ class AligmentUsecase:
     T = result_icp.transformation
     merge_aligned = o3d.geometry.PointCloud(self.merge_pc)  # なるべく元を壊さないようコピー
     merge_aligned.transform(T)
-    merge_aligned = o3d.geometry.PointCloud(self.merge_pc)
-    merge_aligned.transform(T)
 
     # 「マージ点群」を真っ赤にする
     n = len(merge_aligned.points)
@@ -128,7 +125,7 @@ class AligmentUsecase:
       ok = o3d.io.write_point_cloud(tmp_out, merged)
       if not ok:
         raise RuntimeError("failed to write merged point cloud")
-      self.mc.fput_object(base_bucket, base_key, tmp_out, content_type="application/octet-stream")
+      self.mc.fput_object(base_bucket, f"base-data/{geohash}/{geohash}.ply", tmp_out, content_type="application/octet-stream")
       print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
       print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
       print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
