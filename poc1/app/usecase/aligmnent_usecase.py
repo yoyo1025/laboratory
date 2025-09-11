@@ -33,6 +33,7 @@ class AligmentUsecase:
         level = int(m.group(7))
         print(f"INFO:  extracted from key: x={x}, y={y}, level={level}")
         geohash = pygeohash.encode(latitude=x, longitude=y, precision=level )
+        print("INFO:  geohash: ", geohash)
         return geohash
     
   def excute(self, key: str):
