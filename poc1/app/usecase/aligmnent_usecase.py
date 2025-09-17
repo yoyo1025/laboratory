@@ -8,6 +8,7 @@ import re
 from minio.error import S3Error
 from datetime import datetime, timezone
 from minio.commonconfig import CopySource
+from repository.alignment_repo import AlignmentRepository
 
 BUCKET = "local-point-cloud"   # バケット名（固定）
 VOXEL = 0.1                    # 10cm
@@ -18,12 +19,13 @@ DIST_ICP    = VOXEL * 0.5      # ICP   対応距離（5cm）
 def utc_ts():
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-# ========= ユースケース =========
 class AligmentUsecase:
     def __init__(self, merge_pc: o3d.geometry.PointCloud, mc: Minio):
         self.merge_pc = merge_pc
         self.mc = mc
-
+        self.alignment_repository = AlignmentRepository(mc)
+        
+    # 前処理（ダウンサンプリング＋法線推定）
     def preprocess(self, pc: o3d.geometry.PointCloud) -> o3d.geometry.PointCloud:
         p = pc.voxel_down_sample(VOXEL)
         p.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*2, max_nn=30))
@@ -49,70 +51,31 @@ class AligmentUsecase:
         upload_key  = f"{base_prefix}/uploads/{utc_ts()}-{os.path.basename(src_key)}"
         return base_prefix, latest_key, upload_key
 
-    def _stat(self, bucket: str, key: str):
-        try:
-            return self.mc.stat_object(bucket, key)
-        except S3Error as e:
-            if e.code in ("NoSuchKey", "NoSuchObject", "NotFound"):
-                return None
-            raise
-
-    def _download_ply(self, bucket: str, key: str) -> o3d.geometry.PointCloud:
-        with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
-            tmp = tf.name
-        try:
-            self.mc.fget_object(bucket, key, tmp)
-            pc = o3d.io.read_point_cloud(tmp)
-            return pc
-        finally:
-            try: os.remove(tmp)
-            except FileNotFoundError: pass
-
-    def _upload_ply(self, bucket: str, key: str, pc: o3d.geometry.PointCloud):
-        with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
-            tmp_out = tf.name
-        try:
-            ok = o3d.io.write_point_cloud(tmp_out, pc)
-            if not ok:
-                raise RuntimeError("failed to write point cloud to temp file")
-            self.mc.fput_object(bucket, key, tmp_out, content_type="application/octet-stream")
-        finally:
-            try: os.remove(tmp_out)
-            except FileNotFoundError: pass
-
-    def _copy_to_uploads(self, bucket: str, src_key: str, dst_key: str):
-        # オリジナルをそのまま履歴へ（サーバサイドコピー）
-        self.mc.copy_object(
-            bucket_name=bucket,
-            object_name=dst_key,
-            source=CopySource(bucket, src_key),
-        )
-
-    # NOTE: 位置合わせロジックは元コードそのまま（パラメータ/手順を変更しない）
     def execute(self, src_key: str):
         start = time.time()
         geohash = self.calc_geohash(src_key)
         base_prefix, latest_key, upload_key = self._paths(geohash, src_key)
 
-        # 1) 履歴にオリジナルをまず保存
-        self._copy_to_uploads(BUCKET, src_key, upload_key)
+        # 履歴にオリジナルをまず保存
+        self.alignment_repository.copy_to_uploads(BUCKET, src_key, upload_key)
         print(f"INFO: copied original to s3://{BUCKET}/{upload_key}")
 
-        # 2) latest が無ければ初期化（マージなし）
-        if self._stat(BUCKET, latest_key) is None:
+        # latest が無ければ初期化（マージなし）
+        if self.alignment_repository.check_folder_exists(BUCKET, latest_key) is None:
             self._upload_ply(BUCKET, latest_key, self.merge_pc)
             print("INFO: latest not found, initialized")
             print(f"initialized latest at s3://{BUCKET}/{latest_key}")
             print(f"done in {time.time() - start:.2f}s (initialized)")
             return
 
-        # 3) latest 読み込み
-        base_pc = self._download_ply(BUCKET, latest_key)
-
-        # === ここから整列・マージ（元のロジックを変更しない）===
+        # latest 読み込み
+        base_pc = self.alignment_repository.download_ply(BUCKET, latest_key)
+        
+        # 前処理
         base_pc_preprocessed  = self.preprocess(base_pc)
         merge_pc_preprocessed = self.preprocess(self.merge_pc)
 
+        # 特徴量計算
         fpfh1 = o3d.pipelines.registration.compute_fpfh_feature(
             base_pc_preprocessed,
             o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*5, max_nn=100)
@@ -122,6 +85,7 @@ class AligmentUsecase:
             o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*5, max_nn=100)
         )
 
+        # RANSAC
         result_ransac = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
             merge_pc_preprocessed,                  # source
             base_pc_preprocessed,                   # target
@@ -138,6 +102,7 @@ class AligmentUsecase:
         )
         print("RANSAC fitness:", result_ransac.fitness)
 
+        # ICP
         result_icp = o3d.pipelines.registration.registration_icp(
             merge_pc_preprocessed,                  # source
             base_pc_preprocessed,                   # target
@@ -147,22 +112,24 @@ class AligmentUsecase:
         )
         print("ICP fitness   :", result_icp.fitness)
         print("RMSE          :", result_icp.inlier_rmse)
-
+        
+        # 座標変換
         T = result_icp.transformation
         merge_aligned = o3d.geometry.PointCloud(self.merge_pc)  # フル解像を変換
         merge_aligned.transform(T)
 
-        # 新規分を真っ赤に
+        # 新規分を真っ赤に（動作確認のため）
         n = len(merge_aligned.points)
         if n > 0:
             merge_aligned.colors = o3d.utility.Vector3dVector(
                 np.tile([1.0, 0.0, 0.0], (n, 1))
             )
 
+        # 合成
         merged = base_pc + merge_aligned
 
-        # 4) latest を上書き
-        self._upload_ply(BUCKET, latest_key, merged)
+        # 保存
+        self.alignment_repository.upload_ply(BUCKET, latest_key, merged)
 
         print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
         print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
