@@ -151,7 +151,7 @@ MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
     
 mc = Minio(MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, secure=MINIO_SECURE)
 
-def handle_record_sync(rec, mc):
+def handle_record_sync(rec, mc: Minio):
     s3 = rec.get("s3", {})
     bucket = s3.get("bucket", {}).get("name")
     key = s3.get("object", {}).get("key")
@@ -160,12 +160,13 @@ def handle_record_sync(rec, mc):
     if not bucket or not key:
         return
     key = unquote(key)
-    if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply"):
+
+    # tmp/ の .ply の put だけを処理
+    if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
         return
 
-    # === ここからは元の同期処理と同じ ===
-    suffix = os.path.splitext(key)[1] or ".ply"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tf:
+    # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
+    with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
         tmp = tf.name
     try:
         mc.fget_object(bucket, key, tmp)
@@ -174,24 +175,19 @@ def handle_record_sync(rec, mc):
         try: os.remove(tmp)
         except FileNotFoundError: pass
 
-    print("INFO:  bucket name: ", bucket)
-    print("INFO:  object key: ", key)
-    AligmentUsecase(pc, mc).excute(key)
+    print("INFO: bucket:", bucket)
+    print("INFO: object key:", key)
+    AligmentUsecase(pc, mc).execute(key)
 
 @app.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
-    # まず受信してすぐ返す
     try:
         body = await request.json()
     except Exception:
         body = {}
 
     records = body.get("Records", [body]) if isinstance(body, dict) else []
-
-    # 非同期に本処理
-    # ここを非同期にしないとminioがタイムアウトする
     for rec in records:
         background.add_task(handle_record_sync, rec, mc)
 
-    # MinIO に素早く 204 を返す（本文なし）
     return Response(status_code=status.HTTP_204_NO_CONTENT)
