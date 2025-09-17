@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, Request, UploadFile, File, Form, Query, HTTPException, status
+from fastapi import Depends, FastAPI, Request, UploadFile, File, Form, Query, HTTPException, status, BackgroundTasks, Response
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -149,49 +149,45 @@ MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio_root")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio_password")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
     
-mc = Minio(MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, secure=MINIO_SECURE)    
-    
+mc = Minio(MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, secure=MINIO_SECURE)
+
+def handle_record_sync(rec, mc: Minio):
+    s3 = rec.get("s3", {})
+    bucket = s3.get("bucket", {}).get("name")
+    key = s3.get("object", {}).get("key")
+    event = rec.get("eventName", "")
+
+    if not bucket or not key:
+        return
+    key = unquote(key)
+
+    # tmp/ の .ply の put だけを処理
+    if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
+        return
+
+    # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
+    with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
+        tmp = tf.name
+    try:
+        mc.fget_object(bucket, key, tmp)
+        pc = o3d.io.read_point_cloud(tmp)
+    finally:
+        try: os.remove(tmp)
+        except FileNotFoundError: pass
+
+    print("INFO: bucket:", bucket)
+    print("INFO: object key:", key)
+    AligmentUsecase(pc, mc).execute(key)
+
 @app.post("/minio/webhook")
-async def PCLocalAlignmentHandler(request: Request):
-    # Webhook通知のリクエストボディを JSON として取得
-    body = await request.json()
-    # body が辞書型なら Rcords を取り出す
+async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
     records = body.get("Records", [body]) if isinstance(body, dict) else []
-    
-    handled = 0 # 取得したファイル数をカウント
     for rec in records:
-        # S3 オブジェクト情報を取り出す
-        s3 = rec.get("s3", {})
-        bucket = s3.get("bucket", {}).get("name")
-        key = s3.get("object", {}).get("key")
-        event = rec.get("eventName", "")
+        background.add_task(handle_record_sync, rec, mc)
 
-        # バケット名やキーが無い場合はスキップ
-        if not bucket or not key:
-            continue
-
-        # URLエンコードされている場合に備えてデコード 
-        key = unquote(key)
-        
-        # PUT系イベント かつ .ply ファイルだけを対象にする
-        if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply"):
-            continue
-        
-        # 点軍データを一時ファイルとしてopen3dに渡す
-        suffix = os.path.splitext(key)[1] or ".ply"
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tf:
-            tmp = tf.name
-        try:
-            mc.fget_object(bucket, key, tmp)
-            pc = o3d.io.read_point_cloud(tmp)
-        finally:
-            try:
-                os.remove(tmp)
-            except FileNotFoundError:
-                pass
-            
-        # 位置合わせ処理
-        AligmentUsecase(pc, mc).excute()
-        handled += 1
-
-    return {"ok": True, "handled": handled}
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

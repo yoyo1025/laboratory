@@ -63,7 +63,7 @@ services:
       - ./docker/minio/data:/export
   mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
-    depends_on: [minio]
+    depends_on: [minio, api]
     entrypoint: ["/bin/sh", "-lc"]
     command: |
       "mc alias set local http://minio:9000 minio_root minio_password &&
