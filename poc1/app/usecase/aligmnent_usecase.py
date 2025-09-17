@@ -1,13 +1,11 @@
 from minio import Minio
 import open3d as o3d
 import time
-import tempfile, os
+import os
 import numpy as np
 import pygeohash
 import re
-from minio.error import S3Error
 from datetime import datetime, timezone
-from minio.commonconfig import CopySource
 from repository.alignment_repo import AlignmentRepository
 
 BUCKET = "local-point-cloud"   # バケット名（固定）
