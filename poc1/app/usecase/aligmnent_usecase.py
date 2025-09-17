@@ -101,6 +101,7 @@ class AligmentUsecase:
         # 2) latest が無ければ初期化（マージなし）
         if self._stat(BUCKET, latest_key) is None:
             self._upload_ply(BUCKET, latest_key, self.merge_pc)
+            print("INFO: latest not found, initialized")
             print(f"initialized latest at s3://{BUCKET}/{latest_key}")
             print(f"done in {time.time() - start:.2f}s (initialized)")
             return
