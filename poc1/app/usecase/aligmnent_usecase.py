@@ -65,7 +65,7 @@ class AligmentUsecase:
             self.alignment_repository.upload_ply(BUCKET, latest_key, self.merge_pc)
             db = SessionLocal()
             try:
-                self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(src_key), latest_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
+                self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
             finally:
                 db.close()
             print("INFO: latest not found, initialized")
@@ -137,7 +137,7 @@ class AligmentUsecase:
         self.alignment_repository.upload_ply(BUCKET, latest_key, merged)
         db = SessionLocal()
         try:
-            self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(src_key), latest_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
+            self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
         finally:
             db.close()
         print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
