@@ -6,7 +6,8 @@ import numpy as np
 import pygeohash
 import re
 from datetime import datetime, timezone
-from repository.alignment_repo import AlignmentRepository
+from repository.alignment_repository import AlignmentRepository
+from db import SessionLocal      
 
 BUCKET = "local-point-cloud"   # バケット名（固定）
 VOXEL = 0.1                    # 10cm
@@ -18,9 +19,10 @@ def utc_ts():
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 class AligmentUsecase:
-    def __init__(self, merge_pc: o3d.geometry.PointCloud, mc: Minio):
+    def __init__(self, merge_pc: o3d.geometry.PointCloud, mc: Minio, s3: any):
         self.merge_pc = merge_pc
         self.mc = mc
+        self.s3 = s3
         self.alignment_repository = AlignmentRepository(mc)
         
     # 前処理（ダウンサンプリング＋法線推定）
@@ -60,7 +62,12 @@ class AligmentUsecase:
 
         # latest が無ければ初期化（マージなし）
         if self.alignment_repository.check_folder_exists(BUCKET, latest_key) is None:
-            self._upload_ply(BUCKET, latest_key, self.merge_pc)
+            self.alignment_repository.upload_ply(BUCKET, latest_key, self.merge_pc)
+            db = SessionLocal()
+            try:
+                self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
+            finally:
+                db.close()
             print("INFO: latest not found, initialized")
             print(f"initialized latest at s3://{BUCKET}/{latest_key}")
             print(f"done in {time.time() - start:.2f}s (initialized)")
@@ -128,7 +135,11 @@ class AligmentUsecase:
 
         # 保存
         self.alignment_repository.upload_ply(BUCKET, latest_key, merged)
-
+        db = SessionLocal()
+        try:
+            self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
+        finally:
+            db.close()
         print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
         print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
         print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())

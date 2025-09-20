@@ -7,8 +7,6 @@ import pygeohash
 from response import upload_response
 import os
 from pydantic import BaseModel
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, TIMESTAMP, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import FetchedValue
@@ -33,26 +31,6 @@ ALLOWED_EXT = {".ply"}
 # プロジェクトルートパス指定
 APP_ROOT = Path(__file__).resolve().parent
 
-db_user = os.getenv("DB_USER", "sample_user")
-db_pass = urllib.parse.quote_plus(os.getenv("DB_PASSWORD", "sample_password"))
-db_host = os.getenv("DB_HOST", "mysql")
-db_port = os.getenv("DB_PORT", "3306")
-db_name = os.getenv("DB_NAME", "sample_db")
-
-SQLALCHEMY_DATABASE_URI = (
-    f"mysql+mysqlconnector://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
-)
-
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def get_session():
-    db = SessionLocal ()
-    try:
-        yield db
-    finally:
-        db.close()
-
 Base = declarative_base()
 
 class Item(Base):
@@ -69,46 +47,46 @@ class ItemRequest(BaseModel):
     price: float
 
 # GetItemByName
-@app.get("/item")
-def get_item(id: int = None, name: str = Query(None, max_length=50), db: SessionLocal = Depends(get_session)):
-    if id is not None:
-        result_set = db.query(Item).filter(Item.item_id == id).all()
-    elif name is not None:
-        result_set = db.query(Item).filter(Item.name == name).all()
-    else:
-        result_set = db.query(Item).all()    
-    response_body = jsonable_encoder({"list": result_set})
-    return JSONResponse(status_code=status.HTTP_200_OK, content=response_body)
+# @app.get("/item")
+# def get_item(id: int = None, name: str = Query(None, max_length=50), db: SessionLocal = Depends(get_session)):
+#     if id is not None:
+#         result_set = db.query(Item).filter(Item.item_id == id).all()
+#     elif name is not None:
+#         result_set = db.query(Item).filter(Item.name == name).all()
+#     else:
+#         result_set = db.query(Item).all()    
+#     response_body = jsonable_encoder({"list": result_set})
+#     return JSONResponse(status_code=status.HTTP_200_OK, content=response_body)
 
 # CreateItem
-@app.post("/item")
-def create_item(request: ItemRequest, db: SessionLocal = Depends(get_session)):
-    item = Item(
-                name = request.name,
-                price = request.price
-            )
-    db.add(item)
-    db.commit()
-    response_body = jsonable_encoder({"item_id" : item.item_id})
-    return JSONResponse(status_code=status.HTTP_200_OK, content=response_body)
+# @app.post("/item")
+# def create_item(request: ItemRequest, db: SessionLocal = Depends(get_session)):
+#     item = Item(
+#                 name = request.name,
+#                 price = request.price
+#             )
+#     db.add(item)
+#     db.commit()
+#     response_body = jsonable_encoder({"item_id" : item.item_id})
+#     return JSONResponse(status_code=status.HTTP_200_OK, content=response_body)
 
 # UpdateItem
-@app.put("/item/{id}")
-def update_item(id: int, request: ItemRequest, db: SessionLocal = Depends(get_session)):
-    item = db.query(Item).filter(Item.item_id == id).first()
-    if item is None:
-            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND)
-    item.name = request.name
-    item.price = request.price
-    db.commit()
-    return JSONResponse(status_code=status.HTTP_200_OK)
+# @app.put("/item/{id}")
+# def update_item(id: int, request: ItemRequest, db: SessionLocal = Depends(get_session)):
+#     item = db.query(Item).filter(Item.item_id == id).first()
+#     if item is None:
+#             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND)
+#     item.name = request.name
+#     item.price = request.price
+#     db.commit()
+#     return JSONResponse(status_code=status.HTTP_200_OK)
 
 # DeleteItem
-@app.delete("/item/{id}")
-def delete_item(id: int, db: SessionLocal = Depends(get_session)):
-    db.query(Item).filter(Item.item_id == id).delete()
-    db.commit()
-    return JSONResponse(status_code=status.HTTP_200_OK)
+# @app.delete("/item/{id}")
+# def delete_item(id: int, db: SessionLocal = Depends(get_session)):
+#     db.query(Item).filter(Item.item_id == id).delete()
+#     db.commit()
+#     return JSONResponse(status_code=status.HTTP_200_OK)
 
 
 @app.get("/health")
@@ -177,7 +155,7 @@ def handle_record_sync(rec, mc: Minio):
 
     print("INFO: bucket:", bucket)
     print("INFO: object key:", key)
-    AligmentUsecase(pc, mc).execute(key)
+    AligmentUsecase(pc, mc, s3).execute(key)
 
 @app.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
