@@ -53,63 +53,61 @@ class AlignmentRepository:
             source=CopySource(bucket, src_key),
         )
     
-    def save_pc_metadata(
-        self,
-        db: Session,
-        geohash: str,
-        geohash_level: int,
-        filename: str,
-        object_key: str,
-        size_bytes: Optional[int],
-        content_type: Optional[str],
-    ) -> Tuple[int, int]:
-        params_area = {"geohash": geohash, "ghlvl": geohash_level}
-        params_hist = {
-            "file_name": filename,
-            "object_key": object_key,
-            "size_bytes": size_bytes,
-            "content_type": content_type,
-        }
-
+    def save_pc_metadata(self, db: Session, geohash: str, geohash_level: int, filename: str, object_key: str, size_bytes: Optional[int], content_type: Optional[str]) -> Tuple[int, int]:
+        
         with db.begin():
-            # 1) areas を geohash でUPSERT
-            db.execute(text("""
-                INSERT INTO areas (geohash, geohash_level)
-                VALUES (:geohash, :ghlvl)
-                ON DUPLICATE KEY UPDATE
-                    geohash_level = VALUES(geohash_level),
-                    updated_at    = updated_at
-            """), params_area)
-
-            # 2) area_id 取得（確実にロックして取得）
+            # 1-1) 既存エリア取得（FOR UPDATEで同時挿入競合を抑止）
             area_id = db.execute(
                 text("SELECT id FROM areas WHERE geohash = :geohash FOR UPDATE"),
                 {"geohash": geohash},
+            ).scalar()
+
+            if area_id is None:
+                # 1-2) 新規作成
+                db.execute(
+                    text("""
+                        INSERT INTO areas (geohash, geohash_level)
+                        VALUES (:geohash, :lvl)
+                    """),
+                    {"geohash": geohash, "lvl": geohash_level},
+                )
+                # 直近のIDを再取得
+                area_id = db.execute(
+                    text("SELECT id FROM areas WHERE geohash = :geohash"),
+                    {"geohash": geohash},
+                ).scalar_one()
+            else:
+                # 1-3) 既存なら updated_at をタッチ（ビジネスルール次第で省略可）
+                db.execute(
+                    text("UPDATE areas SET updated_at = CURRENT_TIMESTAMP(6) WHERE id = :id"),
+                    {"id": area_id},
+                )
+
+            # 2) 履歴 upsert（重複時も LAST_INSERT_ID で既存idを取る）
+            res = db.execute(
+                text("""
+                    INSERT INTO pc_uploaded_history
+                        (area_id, file_name, object_key, size_bytes, content_type)
+                    VALUES
+                        (:area_id, :file_name, :object_key, :size_bytes, :content_type)
+                    ON DUPLICATE KEY UPDATE
+                        id = LAST_INSERT_ID(id)
+                """),
+                {
+                    "area_id": area_id,
+                    "file_name": filename,
+                    "object_key": object_key,
+                    "size_bytes": size_bytes,
+                    "content_type": content_type,
+                },
+            )
+            upload_id = res.lastrowid or db.execute(
+                text("""
+                    SELECT id FROM pc_uploaded_history
+                    WHERE area_id = :area_id AND object_key = :object_key
+                    LIMIT 1
+                """),
+                {"area_id": area_id, "object_key": object_key},
             ).scalar_one()
-
-            # 3) 履歴 UPSERT（重複時も LAST_INSERT_ID で id を得る）
-            res = db.execute(text("""
-                INSERT INTO pc_uploaded_history
-                    (area_id, file_name, object_key, size_bytes, content_type)
-                VALUES
-                    (:area_id, :file_name, :object_key, :size_bytes, :content_type)
-                ON DUPLICATE KEY UPDATE
-                    id = LAST_INSERT_ID(id)
-            """), {"area_id": area_id, **params_hist})
-
-            upload_id = res.lastrowid or db.execute(text("""
-                SELECT id FROM pc_uploaded_history
-                WHERE area_id = :area_id AND object_key = :object_key
-                LIMIT 1
-            """), {"area_id": area_id, "object_key": object_key}).scalar_one()
-
-            # 4) 最新を更新
-            db.execute(text("""
-                INSERT INTO area_latest (area_id, upload_id)
-                VALUES (:area_id, :upload_id)
-                ON DUPLICATE KEY UPDATE
-                    upload_id = VALUES(upload_id),
-                    updated_at = CURRENT_TIMESTAMP(6)
-            """), {"area_id": area_id, "upload_id": upload_id})
 
         return area_id, upload_id
