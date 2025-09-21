@@ -1,7 +1,6 @@
 version: "3.9"
-
 services:
-  cloud_api:
+  cloud-api:
     build: .
     container_name: "cloud_api_poc1"
     volumes:
@@ -17,9 +16,6 @@ services:
       MINIO_ENDPOINT: "${MINIO_ENDPOINT:-cloud-minio:9100}"
       MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY:-minio_root}"
       MINIO_SECRET_KEY: "${MINIO_SECRET_KEY:-minio_password}"
-    networks:
-      - cloudnet
-
   cloud-mysql:
     image: "mysql:8.0"
     container_name: "cloud_mysql_poc1"
@@ -39,9 +35,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - cloudnet
-
   cloud-phpmyadmin:
     image: "phpmyadmin/phpmyadmin"
     container_name: "cloud_phpmyadmin_poc1"
@@ -53,9 +46,6 @@ services:
       - cloud-mysql
     ports:
       - "8092:80"
-    networks:
-      - cloudnet
-
   cloud-minio:
     container_name: "cloud_minio_poc1"
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
@@ -68,36 +58,16 @@ services:
       MINIO_ROOT_USER: "${MINIO_ROOT_USER:-minio_root}"
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-minio_password}"
       MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI:-on}"
-      MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://cloud_api:8100/minio/webhook}"
+      MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://cloud-api:8100/minio/webhook}"
     command: server --address ":9100" --console-address ":9101" /export
     volumes:
       - ./docker/minio/data:/export
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9100/minio/health/ready"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-    networks:
-      cloudnet:
-        aliases:
-          - cloud-minio
-
   cloud-mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
-    depends_on:
-      cloud-minio:
-        condition: service_healthy
-      cloud_api:
-        condition: service_started
+    depends_on: [cloud-minio, cloud-api]
     entrypoint: ["/bin/sh", "-lc"]
     command: |
       "mc alias set cloud http://cloud-minio:9100 minio_root minio_password && \
       tail -f /dev/null"
-    networks:
-      - cloudnet
-
 volumes:
   cloud_mysql_data:
-
-networks:
-  cloudnet: {}
