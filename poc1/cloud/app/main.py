@@ -11,7 +11,7 @@ app = FastAPI()
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.INFO)
     
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "cloud-minio:9100")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio_root")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio_password")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
@@ -24,27 +24,9 @@ def handle_record_sync(rec, mc: Minio):
     key = s3.get("object", {}).get("key")
     event = rec.get("eventName", "")
 
-    if not bucket or not key:
-        return
-    key = unquote(key)
-
-    # tmp/ の .ply の put だけを処理
-    if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
-        return
-
-    # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
-    with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
-        tmp = tf.name
-    try:
-        mc.fget_object(bucket, key, tmp)
-        pc = o3d.io.read_point_cloud(tmp)
-    finally:
-        try: os.remove(tmp)
-        except FileNotFoundError: pass
-
     print("INFO: bucket:", bucket)
     print("INFO: object key:", key)
-    AligmentUsecase(pc, mc, s3).execute(key)
+    print("INFO: event:", event)
 
 @app.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
