@@ -3,9 +3,11 @@ import os
 from urllib.parse import unquote
 import logging
 from minio import Minio
-import tempfile
-import open3d as o3d
+from fastapi.responses import StreamingResponse
+from starlette.background import BackgroundTask as StarletteBackgroundTask
 from usecase.point_cloud_usecase import PointCloudUsecase
+from usecase.stream_usecase import StreamUsecase
+from datetime import timezone
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -43,3 +45,32 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
         background.add_task(handle_record_sync, rec, mc)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@app.get("/{geohash}")
+def get_city_model(geohash: str):
+    key = f"{geohash}/{geohash}.ply"
+    obj, st = StreamUsecase(mc, key).stream()
+    
+    # HTTPヘッダを整形
+    last_modified = st.last_modified
+    # MinIOのlast_modifiedはTZ付きdatetime想定
+    if last_modified.tzinfo is None:
+        last_modified = last_modified.replace(tzinfo=timezone.utc)
+    headers = {
+        "Content-Length": str(st.size),
+        "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "Content-Disposition": f'attachment; filename="{geohash}.ply"',
+    }
+    
+    def _close():
+        try:
+            obj.close()
+        except Exception:
+            pass
+        
+    return StreamingResponse(
+        obj.stream(32 * 1024),
+        media_type="application/octet-stream",
+        headers=headers,
+        background=StarletteBackgroundTask(_close),
+    )
