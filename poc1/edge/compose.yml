@@ -21,7 +21,7 @@ services:
        CLOUD_MINIO_SECRET_KEY: "${CLOUD_MINIO_SECRET_KEY:-minio_password}"
        CLOUD_MINIO_SECURE: "${CLOUD_MINIO_SECURE:-false}"
        
-       SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-15}"
+       SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-20}"
   mysql:
     image: "mysql:8.0"
     container_name: "mysql_poc1"
