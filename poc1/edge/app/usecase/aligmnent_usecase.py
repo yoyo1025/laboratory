@@ -9,10 +9,10 @@ from datetime import datetime, timezone
 from repository.alignment_repository import AlignmentRepository
 from db import SessionLocal      
 
-BUCKET = "local-point-cloud"   # バケット名（固定）
-VOXEL = 0.1                    # 10cm
-DIST_RANSAC = VOXEL * 1.0      # RANSAC 対応距離（10cm）
-DIST_ICP    = VOXEL * 0.5      # ICP   対応距離（5cm）
+BUCKET = "local-point-cloud"
+VOXEL = 0.1
+DIST_RANSAC = VOXEL * 1.0
+DIST_ICP    = VOXEL * 0.5
 
 
 def utc_ts():
