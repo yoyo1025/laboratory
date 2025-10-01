@@ -9,6 +9,8 @@ import os, asyncio, tempfile, logging
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone
+from minio.error import S3Error
+from fastapi import HTTPException
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -27,6 +29,9 @@ CLOUD_MINIO_ACCESS_KEY = os.getenv("CLOUD_MINIO_ACCESS_KEY", "minio_root")
 CLOUD_MINIO_SECRET_KEY = os.getenv("CLOUD_MINIO_SECRET_KEY", "minio_password")
 CLOUD_MINIO_SECURE = os.getenv("CLOUD_MINIO_SECURE", "false").lower() == "true"
 mc_cloud = Minio(CLOUD_MINIO_ENDPOINT, CLOUD_MINIO_ACCESS_KEY, CLOUD_MINIO_SECRET_KEY, secure=CLOUD_MINIO_SECURE)
+
+LOCAL_BUCKET = "local-point-cloud"
+CLOUD_BUCKET = "cloud-point-cloud"
 
 @app.on_event("startup")
 async def _start_sync():
@@ -85,30 +90,56 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/{geohash}")
 def get_city_model(geohash: str):
-    key = f"{geohash}/latest/latest.ply"
-    obj, st = StreamUsecase(mc, key).stream()
-    
-    # HTTPヘッダを整形
+    obj, st, source, key = get_stream_with_fallback(geohash)
+
     last_modified = st.last_modified
-    # MinIOのlast_modifiedはTZ付きdatetime想定
     if last_modified.tzinfo is None:
         last_modified = last_modified.replace(tzinfo=timezone.utc)
+
     headers = {
         "Content-Length": str(st.size),
         "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "Content-Disposition": f'attachment; filename="{geohash}.ply"',
+        "ETag": getattr(st, "etag", None) or "",
+        # どちらから返したかを明記
+        "X-Pointcloud-Source": source,
+        # 返したオブジェクトキー（デバッグ/可観測性に）
+        "X-Pointcloud-Key": key,
     }
-    
+
     def _close():
         try:
             obj.close()
         except Exception:
             pass
-        
+
     return StreamingResponse(
         obj.stream(32 * 1024),
         media_type="application/octet-stream",
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
-    
+
+def get_stream_with_fallback(geohash: str):
+    # 1) edge 側（局所モデル）
+    local_key = f"{geohash}/latest/latest.ply"
+    try:
+        st = mc.stat_object(LOCAL_BUCKET, local_key)
+        obj = mc.get_object(LOCAL_BUCKET, local_key)
+        return obj, st, "edge", local_key
+    except S3Error as e:
+        # 無い系だけフォールバック、その他は即エラー
+        if e.code not in ("NoSuchKey", "NoSuchObject", "NotFound", "NoSuchBucket"):
+            raise HTTPException(status_code=502, detail=f"edge stat/get error: {e.code}")
+
+    # 2) cloud 側（大域モデル）
+    cloud_key = f"{geohash}/{geohash}.ply"
+    try:
+        st = mc_cloud.stat_object(CLOUD_BUCKET, cloud_key)
+        obj = mc_cloud.get_object(CLOUD_BUCKET, cloud_key)
+        return obj, st, "cloud", cloud_key
+    except S3Error as e:
+        if e.code in ("NoSuchKey", "NoSuchObject", "NotFound", "NoSuchBucket"):
+            # 両方無い
+            raise HTTPException(status_code=404, detail="point cloud not found on edge nor cloud")
+        raise HTTPException(status_code=502, detail=f"cloud stat/get error: {e.code}")
