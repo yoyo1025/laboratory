@@ -28,6 +28,9 @@ CLOUD_MINIO_SECRET_KEY = os.getenv("CLOUD_MINIO_SECRET_KEY", "minio_password")
 CLOUD_MINIO_SECURE = os.getenv("CLOUD_MINIO_SECURE", "false").lower() == "true"
 mc_cloud = Minio(CLOUD_MINIO_ENDPOINT, CLOUD_MINIO_ACCESS_KEY, CLOUD_MINIO_SECRET_KEY, secure=CLOUD_MINIO_SECURE)
 
+LOCAL_BUCKET = "local-point-cloud"
+CLOUD_BUCKET = "cloud-point-cloud"
+
 @app.on_event("startup")
 async def _start_sync():
     app.state.sync_task = asyncio.create_task(BatchUsecase(mc, mc_cloud).periodic_sync_loop())
@@ -85,30 +88,30 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/{geohash}")
 def get_city_model(geohash: str):
-    key = f"{geohash}/latest/latest.ply"
-    obj, st = StreamUsecase(mc, key).stream()
-    
-    # HTTPヘッダを整形
+    obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
+
     last_modified = st.last_modified
-    # MinIOのlast_modifiedはTZ付きdatetime想定
     if last_modified.tzinfo is None:
         last_modified = last_modified.replace(tzinfo=timezone.utc)
+
     headers = {
         "Content-Length": str(st.size),
         "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "Content-Disposition": f'attachment; filename="{geohash}.ply"',
+        "X-Pointcloud-Source": source,  # edge / cloud の識別
+        "X-Pointcloud-Bucket": bucket,
+        "X-Pointcloud-Key": key,
     }
-    
+
     def _close():
         try:
             obj.close()
         except Exception:
             pass
-        
+
     return StreamingResponse(
         obj.stream(32 * 1024),
         media_type="application/octet-stream",
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
-    
