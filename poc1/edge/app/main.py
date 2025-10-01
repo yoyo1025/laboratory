@@ -90,7 +90,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/{geohash}")
 def get_city_model(geohash: str):
-    obj, st, source, key = get_stream_with_fallback(geohash)
+    obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
     last_modified = st.last_modified
     if last_modified.tzinfo is None:
@@ -100,10 +100,8 @@ def get_city_model(geohash: str):
         "Content-Length": str(st.size),
         "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "Content-Disposition": f'attachment; filename="{geohash}.ply"',
-        "ETag": getattr(st, "etag", None) or "",
-        # どちらから返したかを明記
-        "X-Pointcloud-Source": source,
-        # 返したオブジェクトキー（デバッグ/可観測性に）
+        "X-Pointcloud-Source": source,  # edge / cloud の識別
+        "X-Pointcloud-Bucket": bucket,
         "X-Pointcloud-Key": key,
     }
 
@@ -119,27 +117,3 @@ def get_city_model(geohash: str):
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
-
-def get_stream_with_fallback(geohash: str):
-    # 1) edge 側（局所モデル）
-    local_key = f"{geohash}/latest/latest.ply"
-    try:
-        st = mc.stat_object(LOCAL_BUCKET, local_key)
-        obj = mc.get_object(LOCAL_BUCKET, local_key)
-        return obj, st, "edge", local_key
-    except S3Error as e:
-        # 無い系だけフォールバック、その他は即エラー
-        if e.code not in ("NoSuchKey", "NoSuchObject", "NotFound", "NoSuchBucket"):
-            raise HTTPException(status_code=502, detail=f"edge stat/get error: {e.code}")
-
-    # 2) cloud 側（大域モデル）
-    cloud_key = f"{geohash}/{geohash}.ply"
-    try:
-        st = mc_cloud.stat_object(CLOUD_BUCKET, cloud_key)
-        obj = mc_cloud.get_object(CLOUD_BUCKET, cloud_key)
-        return obj, st, "cloud", cloud_key
-    except S3Error as e:
-        if e.code in ("NoSuchKey", "NoSuchObject", "NotFound", "NoSuchBucket"):
-            # 両方無い
-            raise HTTPException(status_code=404, detail="point cloud not found on edge nor cloud")
-        raise HTTPException(status_code=502, detail=f"cloud stat/get error: {e.code}")
