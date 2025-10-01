@@ -9,8 +9,6 @@ import os, asyncio, tempfile, logging
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone
-from minio.error import S3Error
-from fastapi import HTTPException
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
