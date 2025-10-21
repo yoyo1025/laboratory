@@ -9,6 +9,10 @@ import os, asyncio, tempfile, logging
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone
+from pydantic import BaseModel, Field
+import pygeohash
+from db import SessionLocal
+from repository.upload_reservation_repository import UploadReservationRepository
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -116,7 +120,41 @@ def get_city_model(geohash: str):
         background=StarletteBackgroundTask(_close),
     )
     
-@app.get("/upload/prepare")
-def prepare_upload():
+class UploadPrepareRequest(BaseModel):
+    user_id: int = Field(..., ge=1)
+    lat: float = Field(..., ge=-90.0, le=90.0)
+    lon: float = Field(..., ge=-180.0, le=180.0)
+    geohash_level: int = Field(..., ge=1, le=12)
+
+
+upload_reservation_repo = UploadReservationRepository()
+
+
+@app.post("/upload/prepare")
+def prepare_upload(payload: UploadPrepareRequest):
+    """予約を記録してアップロード用フォルダーを返す。"""
+    geohash = pygeohash.encode(
+        latitude=payload.lat,
+        longitude=payload.lon,
+        precision=payload.geohash_level,
+    )
+
+    db = SessionLocal()
+    try:
+        upload_reservation_repo.create_reservation(
+            db,
+            user_id=payload.user_id,
+            geohash=geohash,
+            geohash_level=payload.geohash_level,
+            latitude=payload.lat,
+            longitude=payload.lon,
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
     ## 本来はここで認証やpresigned URL発行などを行う
-    return {"foler_path": "local-point-cloud/tmp"}
+    return {"folder_path": "local-point-cloud/tmp"}

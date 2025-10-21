@@ -36,3 +36,18 @@ CREATE TABLE IF NOT EXISTS pc_uploaded_history (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO pc_uploaded_history (area_id, file_name, object_key, size_bytes, content_type) VALUES (1, 'latest.ply', 'xn1vghzy/latest/latest.ply', 2800, 'application/octet-stream');
+
+-- upload_reservations: アップロード予約
+DROP TABLE IF EXISTS upload_reservations;
+CREATE TABLE IF NOT EXISTS upload_reservations (
+  id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id         BIGINT UNSIGNED NOT NULL,
+  geohash         VARCHAR(12)     NOT NULL,
+  geohash_level   TINYINT UNSIGNED NOT NULL,
+  latitude        DOUBLE          NOT NULL,
+  longitude       DOUBLE          NOT NULL,
+  reserved_at     TIMESTAMP(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (id),
+  KEY idx_upload_reservations_user (user_id),
+  KEY idx_upload_reservations_geohash (geohash, reserved_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
