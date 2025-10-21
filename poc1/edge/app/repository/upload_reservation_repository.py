@@ -13,14 +13,15 @@ class UploadReservationRepository:
         geohash_level: int,
         latitude: float,
         longitude: float,
-    ) -> None:
-        db.execute(
+        upload_object_key: str,
+    ) -> int:
+        result = db.execute(
             text(
                 """
                 INSERT INTO upload_reservations
-                    (user_id, geohash, geohash_level, latitude, longitude)
+                    (user_id, geohash, geohash_level, latitude, longitude, object_key)
                 VALUES
-                    (:user_id, :geohash, :geohash_level, :latitude, :longitude)
+                    (:user_id, :geohash, :geohash_level, :latitude, :longitude, :object_key)
                 """
             ),
             {
@@ -29,5 +30,17 @@ class UploadReservationRepository:
                 "geohash_level": geohash_level,
                 "latitude": latitude,
                 "longitude": longitude,
+                "object_key": upload_object_key,
             },
         )
+        return result.lastrowid or db.execute(
+            text(
+                """
+                SELECT id FROM upload_reservations
+                WHERE user_id = :user_id AND object_key = :object_key
+                ORDER BY id DESC
+                LIMIT 1
+                """
+            ),
+            {"user_id": user_id, "object_key": upload_object_key},
+        ).scalar_one()

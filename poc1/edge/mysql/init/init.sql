@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS upload_reservations (
   geohash_level   TINYINT UNSIGNED NOT NULL,
   latitude        DOUBLE          NOT NULL,
   longitude       DOUBLE          NOT NULL,
+  object_key      VARCHAR(512)    NOT NULL,
   reserved_at     TIMESTAMP(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
   KEY idx_upload_reservations_user (user_id),
