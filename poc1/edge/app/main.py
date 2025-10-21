@@ -86,7 +86,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.get("/{geohash}")
+@app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
@@ -115,3 +115,8 @@ def get_city_model(geohash: str):
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
+    
+@app.get("/upload/prepare")
+def prepare_upload():
+    ## 本来はここで認証やpresigned URL発行などを行う
+    return {"foler_path": "local-point-cloud/tmp"}
