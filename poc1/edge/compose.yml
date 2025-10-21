@@ -23,7 +23,7 @@ services:
        
        SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-20}"
     networks:
-      example-network:
+      edge-network:
         ipv4_address: 172.16.238.10
   mysql:
     image: "mysql:8.0"
@@ -45,7 +45,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      example-network: null
+      edge-network: null
   phpmyadmin:
     image: "phpmyadmin/phpmyadmin"
     container_name: "phpmyadmin_poc1"
@@ -58,7 +58,7 @@ services:
     ports:
       - "8082:80"
     networks:
-      example-network: null
+      edge-network: null
   minio:
     container_name: "minio_poc1"
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
@@ -76,7 +76,7 @@ services:
     volumes:
       - ./docker/minio/data:/export
     networks:
-      example-network: null
+      edge-network: null
   mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
     depends_on: [minio, api]
@@ -87,7 +87,7 @@ services:
        mc anonymous set public local/local-point-cloud
       "
     networks:
-      example-network: null
+      edge-network: null
   prometheus:
     image: prom/prometheus:latest
     restart: unless-stopped
@@ -97,7 +97,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      example-network:
+      edge-network:
         ipv4_address: 172.16.238.11
   grafana:
     image: grafana/grafana
@@ -112,14 +112,14 @@ services:
     env_file:
       - ./grafana/config.monitoring
     networks:
-      example-network:
+      edge-network:
         ipv4_address: 172.16.238.12
 volumes:
   mysql_data:
 
 networks:
-  example-network:
-    name: example-network
+  edge-network:
+    name: edge-network
     driver: bridge
     ipam:
       config:
