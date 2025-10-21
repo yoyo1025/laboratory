@@ -22,6 +22,9 @@ services:
        CLOUD_MINIO_SECURE: "${CLOUD_MINIO_SECURE:-false}"
        
        SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-20}"
+    networks:
+      example-network:
+        ipv4_address: 172.16.238.10
   mysql:
     image: "mysql:8.0"
     container_name: "mysql_poc1"
@@ -41,6 +44,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      example-network: null
   phpmyadmin:
     image: "phpmyadmin/phpmyadmin"
     container_name: "phpmyadmin_poc1"
@@ -52,6 +57,8 @@ services:
       - mysql
     ports:
       - "8082:80"
+    networks:
+      example-network: null
   minio:
     container_name: "minio_poc1"
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
@@ -68,6 +75,8 @@ services:
     command: server --console-address ":9001" /export
     volumes:
       - ./docker/minio/data:/export
+    networks:
+      example-network: null
   mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
     depends_on: [minio, api]
@@ -77,5 +86,41 @@ services:
        tail -f /dev/null &&
        mc anonymous set public local/local-point-cloud
       "
+    networks:
+      example-network: null
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      example-network:
+        ipv4_address: 172.16.238.11
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      example-network:
+        ipv4_address: 172.16.238.12
 volumes:
   mysql_data:
+
+networks:
+  example-network:
+    name: example-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24
