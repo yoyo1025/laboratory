@@ -21,7 +21,7 @@ class BatchUsecase:
             for g in geos:
                 if self.batch_repository.upload_latest_for_geohash(g):
                     ok += 1
-            print(f"[sync] cycle done: geohashes={len(geos)} uploaded={ok}")
+            # print(f"[sync] cycle done: geohashes={len(geos)} uploaded={ok}")
         except Exception as e:
             print(f"[sync] periodic sync failed: {e}")
         await asyncio.sleep(SYNC_INTERVAL_SEC)

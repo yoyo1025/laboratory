@@ -72,7 +72,7 @@ class BatchRepository:
           # Open3Dで読み込み & ダウンサンプリング
           pcd = o3d.io.read_point_cloud(src_tmp)
           if pcd.is_empty():
-            print(f"[sync] skip empty point cloud: {src_key}")
+            # print(f"[sync] skip empty point cloud: {src_key}")
             return False
           
           # ダウンサンプリング
@@ -113,7 +113,7 @@ class BatchRepository:
           # ※ TriangleMesh用の関数を使用
           mesh_ok = o3d.io.write_triangle_mesh(mesh_tmp, mesh, write_ascii=False)
           if not mesh_ok:
-            print(f"[sync] WARN: failed to write mesh for {geohash} (skip mesh upload)")
+            # print(f"[sync] WARN: failed to write mesh for {geohash} (skip mesh upload)")
             mesh_tmp = None
 
           # ===== アップロード =====
@@ -123,13 +123,13 @@ class BatchRepository:
           dst_key = self.cloud_tmp_key(geohash)
           ct = "model/ply" if CLOUD_OBJECT_EXT.lower() == ".ply" else "application/octet-stream"
           self.mc_cloud.fput_object(CLOUD_BUCKET, dst_key, dst_tmp, content_type=ct)
-          print(f"[sync] uploaded (pc) s3://{CLOUD_BUCKET}/{dst_key}")
+          # print(f"[sync] uploaded (pc) s3://{CLOUD_BUCKET}/{dst_key}")
 
           # メッシュ
           if mesh_tmp:
             dst_key_mesh = self.cloud_tmp_mesh_key(geohash)
             self.mc_cloud.fput_object(CLOUD_BUCKET, dst_key_mesh, mesh_tmp, content_type=ct)
-            print(f"[sync] uploaded (mesh) s3://{CLOUD_BUCKET}/{dst_key_mesh}")
+            # print(f"[sync] uploaded (mesh) s3://{CLOUD_BUCKET}/{dst_key_mesh}")
 
           return True
 

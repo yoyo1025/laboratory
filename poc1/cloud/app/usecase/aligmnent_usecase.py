@@ -58,7 +58,7 @@ class AligmentUsecase:
 
         # 履歴にオリジナルをまず保存
         self.alignment_repository.copy_to_uploads(BUCKET, src_key, upload_key)
-        print(f"INFO: copied original to s3://{BUCKET}/{upload_key}")
+        # print(f"INFO: copied original to s3://{BUCKET}/{upload_key}")
 
         # latest が無ければ初期化（マージなし）
         if self.alignment_repository.check_folder_exists(BUCKET, latest_key) is None:
