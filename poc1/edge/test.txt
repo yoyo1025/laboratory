@@ -3,6 +3,5 @@ hello world!
 curl http://localhost:9000/local-point-cloud/tmp/x-34-70011159734301-y-137-73557007483018-8.ply -o x-34-70011159734301-y-137-73557007483018-8.ply
 
 curl -X PUT \
-     -H "Content-Type: text/plain" \
-     --upload-file test.txt \
-     http://localhost:9000/local-point-cloud/test.txt
+     --upload-file x-34-70011159734301-y-137-73557007483018-8.ply \
+     http://localhost:9000/local-point-cloud/tmp/x-34-70011159734301-y-137-73557007483018-8.ply
