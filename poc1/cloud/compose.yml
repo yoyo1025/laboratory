@@ -16,6 +16,9 @@ services:
       MINIO_ENDPOINT: "${MINIO_ENDPOINT:-cloud-minio:9100}"
       MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY:-minio_root}"
       MINIO_SECRET_KEY: "${MINIO_SECRET_KEY:-minio_password}"
+    networks:
+      cloud-network:
+        ipv4_address: 172.16.239.10
   cloud-mysql:
     image: "mysql:8.0"
     container_name: "cloud_mysql_poc1"
@@ -35,6 +38,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      cloud-network: null
   cloud-phpmyadmin:
     image: "phpmyadmin/phpmyadmin"
     container_name: "cloud_phpmyadmin_poc1"
@@ -46,6 +51,8 @@ services:
       - cloud-mysql
     ports:
       - "8092:80"
+    networks:
+      cloud-network: null
   cloud-minio:
     container_name: "cloud_minio_poc1"
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
@@ -62,6 +69,8 @@ services:
     command: server --address ":9100" --console-address ":9101" /export
     volumes:
       - ./docker/minio/data:/export
+    networks:
+      cloud-network: null
   cloud-mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
     depends_on: [cloud-minio, cloud-api]
@@ -69,5 +78,41 @@ services:
     command: |
       "mc alias set cloud http://cloud-minio:9100 minio_root minio_password && \
       tail -f /dev/null"
+    networks:
+      cloud-network: null
+  cloud-prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    container_name: cloud-prometheus
+    ports:
+      - 19090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      cloud-network:
+        ipv4_address: 172.16.239.11
+  cloud-grafana:
+    image: grafana/grafana
+    container_name: cloud-grafana
+    restart: unless-stopped
+    depends_on:
+      - cloud-prometheus
+    ports:
+      - 13000:3000
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      cloud-network:
+        ipv4_address: 172.16.239.12
 volumes:
   cloud_mysql_data:
+
+networks:
+  cloud-network:
+    name: cloud-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24
