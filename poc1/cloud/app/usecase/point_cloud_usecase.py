@@ -21,7 +21,7 @@ class PointCloudUsecase:
       geohash = m.group("gh")
       dst_key = f"{geohash}/mesh/{geohash}-mesh.ply"
       self.point_cloud_repository.copy_to_latest(BUCKET, key, dst_key)
-      print(f"INFO: copied mesh to s3://{BUCKET}/{dst_key}")
+      # print(f"INFO: copied mesh to s3://{BUCKET}/{dst_key}")
       return
 
     m = _pc_pat.match(key)
@@ -29,7 +29,7 @@ class PointCloudUsecase:
       geohash = m.group("gh")
       dst_key = f"{geohash}/{geohash}.ply"
       self.point_cloud_repository.copy_to_latest(BUCKET, key, dst_key)
-      print(f"INFO: copied pointcloud to s3://{BUCKET}/{dst_key}")
+      # print(f"INFO: copied pointcloud to s3://{BUCKET}/{dst_key}")
       return
 
     # 想定外のキーは無視（必要ならログのみ）

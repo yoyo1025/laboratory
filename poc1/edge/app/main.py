@@ -3,12 +3,17 @@ from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask as StarletteBackgroundTask
 from urllib.parse import unquote
 from minio import Minio
-from usecase.aligmnent_usecase import AligmentUsecase  
+from usecase.aligmnent_usecase import AligmentUsecase
 import open3d as o3d
-import os, asyncio, tempfile, logging
+import os, asyncio, tempfile, logging, secrets
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone
+from pydantic import BaseModel, Field
+import pygeohash
+from decimal import Decimal
+from db import SessionLocal
+from repository.upload_reservation_repository import UploadReservationRepository
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -86,7 +91,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.get("/{geohash}")
+@app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
@@ -115,3 +120,77 @@ def get_city_model(geohash: str):
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
+    
+class UploadPrepareRequest(BaseModel):
+    user_id: int = Field(..., ge=1)
+    lat: float = Field(..., ge=-90.0, le=90.0)
+    lon: float = Field(..., ge=-180.0, le=180.0)
+    geohash_level: int = Field(..., ge=1, le=12)
+
+
+upload_reservation_repo = UploadReservationRepository()
+
+
+def _coordinate_parts(value: float):
+    dec = Decimal(str(value))
+    sign = "-" if dec.is_signed() else "+"
+    dec_abs = dec.copy_abs()
+    value_str = format(dec_abs, "f")
+    integer_part, _, fraction_part = value_str.partition(".")
+    if not fraction_part:
+        fraction_part = "0"
+    fraction_part = fraction_part.rstrip("0") or "0"
+    return sign, integer_part, fraction_part
+
+
+def _build_filename(lat: float, lon: float, level: int) -> str:
+    lat_sign, lat_int, lat_frac = _coordinate_parts(lat)
+    lon_sign, lon_int, lon_frac = _coordinate_parts(lon)
+    return (
+        f"x{lat_sign}{lat_int}-{lat_frac}-"
+        f"y{lon_sign}{lon_int}-{lon_frac}-"
+        f"{level}.ply"
+    )
+
+
+@app.post("/upload/prepare")
+def prepare_upload(payload: UploadPrepareRequest):
+    """予約を記録してアップロード用フォルダーを返す。"""
+    geohash = pygeohash.encode(
+        latitude=payload.lat,
+        longitude=payload.lon,
+        precision=payload.geohash_level,
+    )
+    filename = _build_filename(payload.lat, payload.lon, payload.geohash_level)
+    token = secrets.token_hex(8)
+    object_prefix = f"tmp/{geohash}/{token}"
+    object_key = f"{object_prefix}/{filename}"
+
+    db = SessionLocal()
+    try:
+        reservation_id = upload_reservation_repo.create_reservation(
+            db,
+            user_id=payload.user_id,
+            geohash=geohash,
+            geohash_level=payload.geohash_level,
+            latitude=payload.lat,
+            longitude=payload.lon,
+            upload_object_key=object_key,
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+    ## 本来はここで認証やpresigned URL発行などを行う
+    folder_path = f"{LOCAL_BUCKET}/{object_prefix}"
+    return {
+        "reservation_id": reservation_id,
+        "bucket": LOCAL_BUCKET,
+        "folder_path": folder_path,
+        "object_key": object_key,
+        "filename": filename,
+        "geohash": geohash,
+    }
