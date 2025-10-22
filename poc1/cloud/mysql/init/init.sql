@@ -1,5 +1,9 @@
 USE sample_db;
 
+CREATE USER IF NOT EXISTS 'mysqld_exporter'@'%' IDENTIFIED BY 'exp0rt_pass';
+GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysqld_exporter'@'%';
+FLUSH PRIVILEGES;
+
 -- areas: 領域
 DROP TABLE IF EXISTS areas;
 CREATE TABLE IF NOT EXISTS areas (

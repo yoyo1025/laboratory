@@ -51,7 +51,7 @@ services:
     depends_on:
       - cloud-mysql
     ports:
-      - "8092:80"
+      - "8192:80"
     networks:
       cloud-network: null
   cloud-minio:
