@@ -70,6 +70,7 @@ services:
     environment:
        MINIO_ROOT_USER: "${MINIO_ROOT_USER:-minio_root}"
        MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-minio_password}"
+       MINIO_PROMETHEUS_AUTH_TYPE: "public"
        MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI:-on}"
        MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://api:8000/minio/webhook}"
     command: server --console-address ":9001" /export
@@ -86,6 +87,19 @@ services:
        tail -f /dev/null &&
        mc anonymous set public local/local-point-cloud
       "
+    networks:
+      edge-network: null
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.18.0
+    container_name: mysql_exporter_poc1
+    volumes:
+      - ./mysql/secrets/.mysql_exporter.cnf:/etc/.mysqld_exporter.cnf:ro
+    command:
+      - --config.my-cnf=/etc/.mysqld_exporter.cnf
+    depends_on:
+      - mysql
+    ports:
+      - "9104:9104"
     networks:
       edge-network: null
   prometheus:

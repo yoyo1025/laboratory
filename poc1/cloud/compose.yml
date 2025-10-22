@@ -27,6 +27,7 @@ services:
       MYSQL_USER: "sample_user"
       MYSQL_PASSWORD: "sample_password"
       MYSQL_ROOT_PASSWORD: "p@assw0rd"
+      MYSQL_ROOT_HOST: "%"
       TZ: "Asia/Tokyo"
     volumes:
       - cloud_mysql_data:/var/lib/mysql
@@ -64,6 +65,7 @@ services:
     environment:
       MINIO_ROOT_USER: "${MINIO_ROOT_USER:-minio_root}"
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-minio_password}"
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
       MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI:-on}"
       MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://cloud-api:8100/minio/webhook}"
     command: server --address ":9100" --console-address ":9101" /export
@@ -78,6 +80,19 @@ services:
     command: |
       "mc alias set cloud http://cloud-minio:9100 minio_root minio_password && \
       tail -f /dev/null"
+    networks:
+      cloud-network: null
+  cloud-mysql-exporter:
+    image: prom/mysqld-exporter:v0.18.0
+    container_name: cloud_mysql_exporter
+    volumes:
+      - ./mysql/secrets/.mysql_exporter.cnf:/etc/.mysqld_exporter.cnf:ro
+    command:
+      - --config.my-cnf=/etc/.mysqld_exporter.cnf
+    depends_on:
+      - cloud-mysql
+    ports:
+      - "9204:9104"
     networks:
       cloud-network: null
   cloud-prometheus:

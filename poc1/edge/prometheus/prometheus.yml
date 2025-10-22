@@ -11,3 +11,12 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets: ['api:8000']
+  - job_name: 'minio'
+    scrape_interval: 15s
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: ['minio:9000']
+  - job_name: 'mysql'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['mysql-exporter:9104']
