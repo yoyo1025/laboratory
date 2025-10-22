@@ -8,6 +8,7 @@ from starlette.background import BackgroundTask as StarletteBackgroundTask
 from usecase.point_cloud_usecase import PointCloudUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -46,7 +47,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.get("/{geohash}")
+@app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
     key = f"{geohash}/{geohash}.ply"
     obj, st = StreamUsecase(mc, key).stream()
@@ -74,3 +75,5 @@ def get_city_model(geohash: str):
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
+    
+Instrumentator().instrument(app).expose(app)

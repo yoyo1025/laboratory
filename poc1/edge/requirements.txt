@@ -10,3 +10,4 @@ mysql-connector-python
 sqlalchemy
 mysqlclient
 minio
+prometheus-fastapi-instrumentator

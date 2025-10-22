@@ -2,7 +2,7 @@ from repository.batch_repository import BatchRepository
 import os, asyncio
 from minio import Minio
 
-SYNC_INTERVAL_SEC = int(os.getenv("SYNC_INTERVAL_SEC", "20"))
+SYNC_INTERVAL_SEC = int(os.getenv("SYNC_INTERVAL_SEC", "30"))
 CLOUD_BUCKET = "cloud-point-cloud"
 
 class BatchUsecase:

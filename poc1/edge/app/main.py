@@ -14,6 +14,7 @@ import pygeohash
 from decimal import Decimal
 from db import SessionLocal
 from repository.upload_reservation_repository import UploadReservationRepository
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -194,3 +195,5 @@ def prepare_upload(payload: UploadPrepareRequest):
         "filename": filename,
         "geohash": geohash,
     }
+
+Instrumentator().instrument(app).expose(app)
