@@ -4,7 +4,7 @@ import { check, sleep } from 'k6';
 const API_BASE_URL = __ENV.API_BASE_URL || 'http://localhost:8000';
 const MINIO_BASE_URL = (__ENV.MINIO_BASE_URL || 'http://localhost:9000').replace(/\/$/, '');
 const SAMPLE_FILE = open('./sample.ply', 'b');
-const GEOHASH_TARGETS = ['xn1vqhzy', 'duummy111'];
+const GEOHASH_TARGETS = ['xn1vqhzy', 'dummy111'];
 
 export const options = {
   scenarios: {

@@ -16,7 +16,7 @@ export const options = {
 
 const TARGETS = [
   'http://localhost:8000/pointcloud/xn1vqhzy',
-  'http://localhost:8000/pointcloud/duummy111',
+  'http://localhost:8000/pointcloud/dummy111',
 ];
 
 export default function () {
