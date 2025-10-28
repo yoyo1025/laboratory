@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status, BackgroundTasks, Response
+from fastapi import FastAPI, Request, status, BackgroundTasks, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask as StarletteBackgroundTask
 from urllib.parse import unquote
@@ -8,7 +8,8 @@ import open3d as o3d
 import os, asyncio, tempfile, logging, secrets
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
-from datetime import timezone
+from datetime import timezone, datetime
+from email.utils import parsedate_to_datetime
 from pydantic import BaseModel, Field
 import pygeohash
 from decimal import Decimal
@@ -97,31 +98,63 @@ def get_city_model(geohash: str):
     # エッジ or クラウドからストリーミング取得
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
-    last_modified = st.last_modified
-    if last_modified.tzinfo is None:
-        last_modified = last_modified.replace(tzinfo=timezone.utc)
+    if hasattr(st, "last_modified"):
+        last_modified_dt = st.last_modified
+    else:
+        lm = st.get("Last-Modified") if isinstance(st, dict) else None
+        last_modified_dt = parsedate_to_datetime(lm) if lm else None
+
+    if last_modified_dt is None:
+        last_modified_dt = datetime.now(timezone.utc)
+    elif last_modified_dt.tzinfo is None:
+        last_modified_dt = last_modified_dt.replace(tzinfo=timezone.utc)
+
+    # サイズも属性/ヘッダ両対応
+    if hasattr(st, "size"):
+        size_val = st.size
+    else:
+        cl = st.get("Content-Length") if isinstance(st, dict) else None
+        size_val = int(cl) if cl and cl.isdigit() else None
 
     headers = {
-        "Content-Length": str(st.size),
-        "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),
+        "Last-Modified": last_modified_dt.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "Content-Disposition": f'attachment; filename="{geohash}.ply"',
-        "X-Pointcloud-Source": source,  # edge / cloud の識別
+        "X-Pointcloud-Source": source,  # edge / cloud-http
         "X-Pointcloud-Bucket": bucket,
         "X-Pointcloud-Key": key,
     }
+    
+    chunk = 32 * 1024
+    if hasattr(obj, "stream") and callable(obj.stream):
+        body_iter = obj.stream(chunk)
+    elif hasattr(obj, "iter_content") and callable(obj.iter_content):
+        body_iter = obj.iter_content(chunk_size=chunk)
+    elif hasattr(obj, "read") and callable(obj.read):
+        def _gen():
+            while True:
+                data = obj.read(chunk)
+                if not data:
+                    break
+                yield data
+        body_iter = _gen()
+    else:
+        raise HTTPException(status_code=502, detail="unsupported stream body object")
 
     def _close():
         try:
-            obj.close()
+            if hasattr(obj, "close"):
+                obj.close()
         except Exception:
             pass
 
     return StreamingResponse(
-        obj.stream(32 * 1024),
+        body_iter,
         media_type="application/octet-stream",
         headers=headers,
         background=StarletteBackgroundTask(_close),
     )
+
     
 class UploadPrepareRequest(BaseModel):
     user_id: int = Field(..., ge=1)

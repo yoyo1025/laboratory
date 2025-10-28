@@ -3,6 +3,7 @@ from minio import Minio
 from minio.error import S3Error
 from fastapi import HTTPException
 from typing import Tuple
+import requests
 
 LOCAL_BUCKET_DEFAULT = "local-point-cloud"
 CLOUD_BUCKET_DEFAULT = "cloud-point-cloud"
@@ -35,12 +36,14 @@ class StreamUsecase:
             if not self._is_not_found(e):
                 raise HTTPException(status_code=502, detail=f"edge stat/get error: {e.code}")
 
-        # 2) cloud (大域モデル)
-        cloud_key = f"{self.geohash}/{self.geohash}.ply"
+        # 2) cloud (大域モデル) クラウド側のAPIへ問い合わせてストリーミング取得
+        cloud_url = f"http://host.docker.internal:8100/pointcloud/{self.geohash}"
         try:
-            obj, st = self._try_get(self.mc_cloud, self.cloud_bucket, cloud_key)
-            return obj, st, "cloud", self.cloud_bucket, cloud_key
-        except S3Error as e:
-            if self._is_not_found(e):
+            resp = requests.get(cloud_url, stream=True, timeout=10)
+            if resp.status_code == 404:
                 raise HTTPException(status_code=404, detail="point cloud not found on edge nor cloud")
-            raise HTTPException(status_code=502, detail=f"cloud stat/get error: {e.code}")
+            if resp.status_code >= 400:
+                raise HTTPException(status_code=502, detail=f"cloud http get error: {resp.status_code}")
+            return resp.raw, resp.headers, "cloud-http", "http", cloud_url
+        except requests.RequestException as e:
+            raise HTTPException(status_code=502, detail=f"cloud http request error: {e.__class__.__name__}: {e}")
