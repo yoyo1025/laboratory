@@ -33,6 +33,7 @@ datasources:
     withCredentials:
     # <bool> mark as default datasource. Max one per org
     isDefault: true
+    uid: PBFA97CFB590B2093
     # <map> fields that will be converted to json and stored in json_data
     jsonData:
       graphiteVersion: "1.1"
