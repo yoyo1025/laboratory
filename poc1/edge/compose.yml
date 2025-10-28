@@ -83,10 +83,9 @@ services:
     depends_on: [minio, api]
     entrypoint: ["/bin/sh", "-lc"]
     command: |
-      "mc alias set local http://minio:9000 minio_root minio_password &&
-       tail -f /dev/null &&
-       mc anonymous set public local/local-point-cloud
-      "
+      mc alias set local http://minio:9000 minio_root minio_password && \
+      mc anonymous set public local/local-point-cloud || true && \
+      sleep infinity
     networks:
       edge-network: null
   mysql-exporter:
