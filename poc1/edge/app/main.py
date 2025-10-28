@@ -95,64 +95,48 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
-    # エッジ or クラウドからストリーミング取得
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
-    if hasattr(st, "last_modified"):
-        last_modified_dt = st.last_modified
-    else:
-        lm = st.get("Last-Modified") if isinstance(st, dict) else None
-        last_modified_dt = parsedate_to_datetime(lm) if lm else None
+    lm = getattr(st, "last_modified", None) or (st.get("Last-Modified") if isinstance(st, dict) else None)
+    if isinstance(lm, str):
+        try:
+            lm = parsedate_to_datetime(lm)
+        except Exception:
+            lm = None
+    if lm is None:
+        lm = datetime.now(timezone.utc)
+    elif lm.tzinfo is None:
+        lm = lm.replace(tzinfo=timezone.utc)
 
-    if last_modified_dt is None:
-        last_modified_dt = datetime.now(timezone.utc)
-    elif last_modified_dt.tzinfo is None:
-        last_modified_dt = last_modified_dt.replace(tzinfo=timezone.utc)
-
-    # サイズも属性/ヘッダ両対応
-    if hasattr(st, "size"):
-        size_val = st.size
-    else:
-        cl = st.get("Content-Length") if isinstance(st, dict) else None
+    size_val = getattr(st, "size", None)
+    if size_val is None and isinstance(st, dict):
+        cl = st.get("Content-Length")
         size_val = int(cl) if cl and cl.isdigit() else None
 
     headers = {
         **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),
-        "Last-Modified": last_modified_dt.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "Last-Modified": lm.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "Content-Disposition": f'attachment; filename="{geohash}.ply"',
-        "X-Pointcloud-Source": source,  # edge / cloud-http
+        "X-Pointcloud-Source": source,
         "X-Pointcloud-Bucket": bucket,
         "X-Pointcloud-Key": key,
     }
-    
+
     chunk = 32 * 1024
-    if hasattr(obj, "stream") and callable(obj.stream):
+    if hasattr(obj, "stream"):
         body_iter = obj.stream(chunk)
-    elif hasattr(obj, "iter_content") and callable(obj.iter_content):
+    elif hasattr(obj, "iter_content"):
         body_iter = obj.iter_content(chunk_size=chunk)
-    elif hasattr(obj, "read") and callable(obj.read):
-        def _gen():
-            while True:
-                data = obj.read(chunk)
-                if not data:
-                    break
-                yield data
-        body_iter = _gen()
+    elif hasattr(obj, "read"):
+        body_iter = iter(lambda: obj.read(chunk), b"")
     else:
         raise HTTPException(status_code=502, detail="unsupported stream body object")
-
-    def _close():
-        try:
-            if hasattr(obj, "close"):
-                obj.close()
-        except Exception:
-            pass
 
     return StreamingResponse(
         body_iter,
         media_type="application/octet-stream",
         headers=headers,
-        background=StarletteBackgroundTask(_close),
+        background=StarletteBackgroundTask(getattr(obj, "close", lambda: None)),
     )
 
     
