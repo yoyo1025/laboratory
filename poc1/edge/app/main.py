@@ -94,6 +94,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
+    # エッジ or クラウドからストリーミング取得
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
     last_modified = st.last_modified
