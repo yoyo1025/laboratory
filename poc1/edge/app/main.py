@@ -95,49 +95,64 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
+    # ユースケース：まずエッジMinIOを探し、無ければクラウドAPI(HTTP)へフォールバック
+    # obj: 本体(ファイルライク/HTTPストリーム), st: メタ情報(MinIO Stat or HTTPヘッダdict)
+    # source/bucket/key: デバッグ・トレース用メタ
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
+    # --- Last-Modified を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
     lm = getattr(st, "last_modified", None) or (st.get("Last-Modified") if isinstance(st, dict) else None)
+    # 文字列（HTTPヘッダ）の場合は datetime へパース
     if isinstance(lm, str):
         try:
             lm = parsedate_to_datetime(lm)
         except Exception:
             lm = None
+    # 値が無ければ現在UTC、TZ無しならUTCを付与
     if lm is None:
         lm = datetime.now(timezone.utc)
     elif lm.tzinfo is None:
         lm = lm.replace(tzinfo=timezone.utc)
 
+    # --- Content-Length を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
     size_val = getattr(st, "size", None)
     if size_val is None and isinstance(st, dict):
         cl = st.get("Content-Length")
-        size_val = int(cl) if cl and cl.isdigit() else None
+        size_val = int(cl) if cl and cl.isdigit() else None  # 数値にできない場合は未設定（チャンク配信）
 
+    # --- 応答ヘッダを組み立て（取得元をカスタムヘッダで可視化） ---
     headers = {
-        **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),
-        "Last-Modified": lm.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "Content-Disposition": f'attachment; filename="{geohash}.ply"',
-        "X-Pointcloud-Source": source,
+        **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),  # 分かるときだけ付与
+        "Last-Modified": lm.strftime("%a, %d %b %Y %H:%M:%S GMT"),  # RFC1123
+        "Content-Disposition": f'attachment; filename="{geohash}.ply"',  # ダウンロード名
+        "X-Pointcloud-Source": source,  # edge / cloud-http
         "X-Pointcloud-Bucket": bucket,
         "X-Pointcloud-Key": key,
     }
 
-    chunk = 32 * 1024
+    # --- 本体のストリームを最小分岐で生成（メモリに載せず転送） ---
+    chunk = 32 * 1024  # 32KB チャンク
     if hasattr(obj, "stream"):
+        # MinIOオブジェクト（.stream が提供される）
         body_iter = obj.stream(chunk)
     elif hasattr(obj, "iter_content"):
+        # requests.Response（HTTP経由）
         body_iter = obj.iter_content(chunk_size=chunk)
     elif hasattr(obj, "read"):
+        # urllib3 の raw など read() しかない場合
         body_iter = iter(lambda: obj.read(chunk), b"")
     else:
+        # 想定外の型
         raise HTTPException(status_code=502, detail="unsupported stream body object")
 
+    # --- StreamingResponse で逐次返却。送信完了後に close（あれば）を実行 ---
     return StreamingResponse(
         body_iter,
         media_type="application/octet-stream",
         headers=headers,
         background=StarletteBackgroundTask(getattr(obj, "close", lambda: None)),
     )
+
 
     
 class UploadPrepareRequest(BaseModel):
