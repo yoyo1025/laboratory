@@ -55,3 +55,9 @@ datasources:
     jsonData:
       serviceMap:
         datasourceUid: 'Prometheus'
+  - uid: local-pyroscope
+    type: grafana-pyroscope-datasource
+    name: Pyroscope
+    url: http://edge1-pyroscope:4040
+    jsonData:
+      keepCookies: [pyroscope_git_session]

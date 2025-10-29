@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status, BackgroundTasks, HTTPException, Response
+from fastapi import FastAPI, Request, status, BackgroundTasks, HTTPException, Response, APIRouter
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask as StarletteBackgroundTask
 from urllib.parse import unquote
@@ -16,7 +16,9 @@ from decimal import Decimal
 from db import SessionLocal
 from repository.upload_reservation_repository import UploadReservationRepository
 from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi.routing import APIRoute 
 
+# Tempo 用ライブラリ
 from opentelemetry import trace 
 from opentelemetry.sdk.trace import TracerProvider 
 from opentelemetry.sdk.trace.export import BatchSpanProcessor 
@@ -24,6 +26,8 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import Resource 
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter 
 
+# Pyroscope 用ライブラリ
+import pyroscope
 
 app = FastAPI()
 
@@ -49,6 +53,11 @@ trace.get_tracer_provider().add_span_processor(span_processor)
 # Instrument the app automatically
 FastAPIInstrumentor.instrument_app(app)
 
+pyroscope.configure( 
+  application_name = "backend" , 
+  server_address = "http://edge1-pyroscope:4040" , 
+) 
+
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.INFO)
 
@@ -68,6 +77,22 @@ mc_cloud = Minio(CLOUD_MINIO_ENDPOINT, CLOUD_MINIO_ACCESS_KEY, CLOUD_MINIO_SECRE
 
 LOCAL_BUCKET = "local-point-cloud"
 CLOUD_BUCKET = "cloud-point-cloud"
+
+class  PyroscopeRoute ( APIRoute ): 
+    def  get_route_handler ( self ): 
+        original_handler = super ().get_route_handler() 
+        async  def  custom_handler ( request: Request ) -> Response: 
+            route = request.scope.get( "route" ) 
+            template = getattr (route, "path_format" , getattr (route, "path" , request.url.path)) 
+            method = request.method 
+            tag = f"{method}:{template}" 
+            with pyroscope.tag_wrapper({ "endpoint" : tag}): 
+                return  await original_handler(request) 
+        return custom_handler 
+
+api_router = APIRouter(prefix= "" , route_class=PyroscopeRoute) 
+
+app.include_router(api_router) 
 
 @app.on_event("startup")
 async def _start_sync():
@@ -111,7 +136,7 @@ def handle_record_sync(rec, mc: Minio):
     print("INFO: object key:", key)
     AligmentUsecase(pc, mc, s3).execute(key)
 
-@app.post("/minio/webhook")
+@api_router.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
     try:
         body = await request.json()
@@ -124,7 +149,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.get("/pointcloud/{geohash}")
+@api_router.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
     # ユースケース：まずエッジMinIOを探し、無ければクラウドAPI(HTTP)へフォールバック
     # obj: 本体(ファイルライク/HTTPストリーム), st: メタ情報(MinIO Stat or HTTPヘッダdict)
@@ -218,7 +243,7 @@ def _build_filename(lat: float, lon: float, level: int) -> str:
     )
 
 
-@app.post("/upload/prepare")
+@api_router.post("/upload/prepare")
 def prepare_upload(payload: UploadPrepareRequest):
     """予約を記録してアップロード用フォルダーを返す。"""
     geohash = pygeohash.encode(

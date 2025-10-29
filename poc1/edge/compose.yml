@@ -139,6 +139,15 @@ services:
       - "3200:3200"   # Tempo UI
     networks:
       edge1-network: {}
+  edge1-pyroscope:
+    image: grafana/pyroscope:latest
+    ports:
+      - "4040:4040"
+    command:
+      - "server"
+    restart: unless-stopped
+    networks:
+      edge1-network: {}
 volumes:
   mysql_data:
 
