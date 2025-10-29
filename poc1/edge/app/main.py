@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status, BackgroundTasks, Response
+from fastapi import FastAPI, Request, status, BackgroundTasks, HTTPException, Response, APIRouter
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask as StarletteBackgroundTask
 from urllib.parse import unquote
@@ -8,19 +8,61 @@ import open3d as o3d
 import os, asyncio, tempfile, logging, secrets
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
-from datetime import timezone
+from datetime import timezone, datetime
+from email.utils import parsedate_to_datetime
 from pydantic import BaseModel, Field
 import pygeohash
 from decimal import Decimal
 from db import SessionLocal
 from repository.upload_reservation_repository import UploadReservationRepository
+from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi.routing import APIRoute 
+
+# Tempo 用ライブラリ
+from opentelemetry import trace 
+from opentelemetry.sdk.trace import TracerProvider 
+from opentelemetry.sdk.trace.export import BatchSpanProcessor 
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor 
+from opentelemetry.sdk.resources import Resource 
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter 
+
+# Pyroscope 用ライブラリ
+import pyroscope
 
 app = FastAPI()
+
+# Define a resource to identify our service
+resource = Resource(attributes={
+    "service.name": "the-app" 
+})
+
+# Configure the OTLP exporter to send traces to our collector
+otlp_exporter = OTLPSpanExporter(
+    endpoint="edge1-otel-collector:4317", # The collector's gRPC endpoint
+    insecure=True 
+)
+
+# Set up the tracer provider
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer = trace.get_tracer(__name__)
+
+# Create a BatchSpanProcessor to send traces in batches
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Instrument the app automatically
+FastAPIInstrumentor.instrument_app(app)
+
+pyroscope.configure( 
+  application_name = "backend" , 
+  server_address = "http://edge1-pyroscope:4040" , 
+) 
+
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.INFO)
 
 # ローカルMinioクライアント初期化
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "edge1-minio:9000")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio_root")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio_password")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
@@ -35,6 +77,22 @@ mc_cloud = Minio(CLOUD_MINIO_ENDPOINT, CLOUD_MINIO_ACCESS_KEY, CLOUD_MINIO_SECRE
 
 LOCAL_BUCKET = "local-point-cloud"
 CLOUD_BUCKET = "cloud-point-cloud"
+
+class  PyroscopeRoute ( APIRoute ): 
+    def  get_route_handler ( self ): 
+        original_handler = super ().get_route_handler() 
+        async  def  custom_handler ( request: Request ) -> Response: 
+            route = request.scope.get( "route" ) 
+            template = getattr (route, "path_format" , getattr (route, "path" , request.url.path)) 
+            method = request.method 
+            tag = f"{method}:{template}" 
+            with pyroscope.tag_wrapper({ "endpoint" : tag}): 
+                return  await original_handler(request) 
+        return custom_handler 
+
+api_router = APIRouter(prefix= "" , route_class=PyroscopeRoute) 
+
+app.include_router(api_router) 
 
 @app.on_event("startup")
 async def _start_sync():
@@ -78,7 +136,7 @@ def handle_record_sync(rec, mc: Minio):
     print("INFO: object key:", key)
     AligmentUsecase(pc, mc, s3).execute(key)
 
-@app.post("/minio/webhook")
+@api_router.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
     try:
         body = await request.json()
@@ -91,35 +149,67 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.get("/pointcloud/{geohash}")
+@api_router.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
+    # ユースケース：まずエッジMinIOを探し、無ければクラウドAPI(HTTP)へフォールバック
+    # obj: 本体(ファイルライク/HTTPストリーム), st: メタ情報(MinIO Stat or HTTPヘッダdict)
+    # source/bucket/key: デバッグ・トレース用メタ
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
 
-    last_modified = st.last_modified
-    if last_modified.tzinfo is None:
-        last_modified = last_modified.replace(tzinfo=timezone.utc)
+    # --- Last-Modified を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
+    lm = getattr(st, "last_modified", None) or (st.get("Last-Modified") if isinstance(st, dict) else None)
+    # 文字列（HTTPヘッダ）の場合は datetime へパース
+    if isinstance(lm, str):
+        try:
+            lm = parsedate_to_datetime(lm)
+        except Exception:
+            lm = None
+    # 値が無ければ現在UTC、TZ無しならUTCを付与
+    if lm is None:
+        lm = datetime.now(timezone.utc)
+    elif lm.tzinfo is None:
+        lm = lm.replace(tzinfo=timezone.utc)
 
+    # --- Content-Length を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
+    size_val = getattr(st, "size", None)
+    if size_val is None and isinstance(st, dict):
+        cl = st.get("Content-Length")
+        size_val = int(cl) if cl and cl.isdigit() else None  # 数値にできない場合は未設定（チャンク配信）
+
+    # --- 応答ヘッダを組み立て（取得元をカスタムヘッダで可視化） ---
     headers = {
-        "Content-Length": str(st.size),
-        "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "Content-Disposition": f'attachment; filename="{geohash}.ply"',
-        "X-Pointcloud-Source": source,  # edge / cloud の識別
+        **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),  # 分かるときだけ付与
+        "Last-Modified": lm.strftime("%a, %d %b %Y %H:%M:%S GMT"),  # RFC1123
+        "Content-Disposition": f'attachment; filename="{geohash}.ply"',  # ダウンロード名
+        "X-Pointcloud-Source": source,  # edge / cloud-http
         "X-Pointcloud-Bucket": bucket,
         "X-Pointcloud-Key": key,
     }
 
-    def _close():
-        try:
-            obj.close()
-        except Exception:
-            pass
+    # --- 本体のストリームを最小分岐で生成（メモリに載せず転送） ---
+    chunk = 32 * 1024  # 32KB チャンク
+    if hasattr(obj, "stream"):
+        # MinIOオブジェクト（.stream が提供される）
+        body_iter = obj.stream(chunk)
+    elif hasattr(obj, "iter_content"):
+        # requests.Response（HTTP経由）
+        body_iter = obj.iter_content(chunk_size=chunk)
+    elif hasattr(obj, "read"):
+        # urllib3 の raw など read() しかない場合
+        body_iter = iter(lambda: obj.read(chunk), b"")
+    else:
+        # 想定外の型
+        raise HTTPException(status_code=502, detail="unsupported stream body object")
 
+    # --- StreamingResponse で逐次返却。送信完了後に close（あれば）を実行 ---
     return StreamingResponse(
-        obj.stream(32 * 1024),
+        body_iter,
         media_type="application/octet-stream",
         headers=headers,
-        background=StarletteBackgroundTask(_close),
+        background=StarletteBackgroundTask(getattr(obj, "close", lambda: None)),
     )
+
+
     
 class UploadPrepareRequest(BaseModel):
     user_id: int = Field(..., ge=1)
@@ -153,7 +243,7 @@ def _build_filename(lat: float, lon: float, level: int) -> str:
     )
 
 
-@app.post("/upload/prepare")
+@api_router.post("/upload/prepare")
 def prepare_upload(payload: UploadPrepareRequest):
     """予約を記録してアップロード用フォルダーを返す。"""
     geohash = pygeohash.encode(
@@ -194,3 +284,5 @@ def prepare_upload(payload: UploadPrepareRequest):
         "filename": filename,
         "geohash": geohash,
     }
+
+Instrumentator().instrument(app).expose(app)
