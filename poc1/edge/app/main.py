@@ -34,7 +34,7 @@ resource = Resource(attributes={
 
 # Configure the OTLP exporter to send traces to our collector
 otlp_exporter = OTLPSpanExporter(
-    endpoint="otel-collector:4317", # The collector's gRPC endpoint
+    endpoint="edge1-otel-collector:4317", # The collector's gRPC endpoint
     insecure=True 
 )
 
