@@ -5,18 +5,18 @@ scrape_configs:
   - job_name: 'prometheus'
     scrape_interval: 15s
     static_configs:
-      - targets: ['prometheus:9090']
+      - targets: ['edge1-prometheus:9090']
   - job_name: 'app'
     scrape_interval: 5s
     metrics_path: /metrics
     static_configs:
-      - targets: ['api:8000']
+      - targets: ['edge1-api:8000']
   - job_name: 'minio'
     scrape_interval: 15s
     metrics_path: /minio/v2/metrics/cluster
     static_configs:
-      - targets: ['minio:9000']
+      - targets: ['edge1-minio:9000']
   - job_name: 'mysql'
     scrape_interval: 15s
     static_configs:
-      - targets: ['mysql-exporter:9104']
+      - targets: ['edge1-mysql-exporter:9104']

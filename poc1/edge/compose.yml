@@ -1,18 +1,17 @@
 services:
-  api:
+  edge1-api:
     build: .
-    container_name: "api"
     volumes:
       - ./app:/app
     ports:
       - "8000:8000"
     depends_on:
-      mysql:
+      edge1-mysql:
         condition: service_healthy
     env_file:
       - ./.env
     environment:
-       MINIO_ENDPOINT: "${MINIO_ENDPOINT:-minio:9000}"
+       MINIO_ENDPOINT: "${MINIO_ENDPOINT:-edge1-minio:9000}"
        MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY:-minio_root}"
        MINIO_SECRET_KEY: "${MINIO_SECRET_KEY:-minio_password}"
 
@@ -23,11 +22,9 @@ services:
        
        SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-20}"
     networks:
-      edge-network:
-        ipv4_address: 172.16.238.10
-  mysql:
+      edge-network: {}
+  edge1-mysql:
     image: "mysql:8.0"
-    container_name: "mysql_poc1"
     environment:
       MYSQL_DATABASE: "sample_db"
       MYSQL_USER: "sample_user"
@@ -45,22 +42,20 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      edge-network: null
-  phpmyadmin:
+      edge-network: {}
+  edge1-phpmyadmin:
     image: "phpmyadmin/phpmyadmin"
-    container_name: "phpmyadmin_poc1"
     environment:
-      PMA_HOST: "mysql"
+      PMA_HOST: "edge1-mysql"
       PMA_USER: "root"
       PMA_PASSWORD: "p@assw0rd"
     depends_on:
-      - mysql
+      - edge1-mysql
     ports:
       - "8082:80"
     networks:
-      edge-network: null
-  minio:
-    container_name: "minio_poc1"
+      edge-network: {}
+  edge1-minio:
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
     ports:
       - "9000:9000" # API用
@@ -77,47 +72,43 @@ services:
     volumes:
       - ./docker/minio/data:/export
     networks:
-      edge-network: null
-  mc:
+      edge-network: {}
+  edge1-mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
-    depends_on: [minio, api]
+    depends_on: [edge1-minio, edge1-api]
     entrypoint: ["/bin/sh", "-lc"]
     command: |
-      mc alias set local http://minio:9000 minio_root minio_password && \
+      mc alias set local http://edge1-minio:9000 minio_root minio_password && \
       mc anonymous set public local/local-point-cloud || true && \
       sleep infinity
     networks:
-      edge-network: null
-  mysql-exporter:
+      edge-network: {}
+  edge1-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0
-    container_name: mysql_exporter_poc1
     volumes:
       - ./mysql/secrets/.mysql_exporter.cnf:/etc/.mysqld_exporter.cnf:ro
     command:
       - --config.my-cnf=/etc/.mysqld_exporter.cnf
     depends_on:
-      - mysql
+      - edge1-mysql
     ports:
       - "9104:9104"
     networks:
-      edge-network: null
-  prometheus:
+      edge-network: {}
+  edge1-prometheus:
     image: prom/prometheus:latest
     restart: unless-stopped
-    container_name: prometheus
     ports:
       - 9090:9090
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      edge-network:
-        ipv4_address: 172.16.238.11
-  grafana:
+      edge-network: {}
+  edge1-grafana:
     image: grafana/grafana
-    container_name: grafana
     restart: unless-stopped
     depends_on:
-      - prometheus
+      - edge1-prometheus
     ports:
       - 3000:3000
     volumes:
@@ -125,8 +116,7 @@ services:
     env_file:
       - ./grafana/config.monitoring
     networks:
-      edge-network:
-        ipv4_address: 172.16.238.12
+      edge-network: {}
 volumes:
   mysql_data:
 
