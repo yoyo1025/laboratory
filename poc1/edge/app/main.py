@@ -17,7 +17,38 @@ from db import SessionLocal
 from repository.upload_reservation_repository import UploadReservationRepository
 from prometheus_fastapi_instrumentator import Instrumentator
 
+from opentelemetry import trace 
+from opentelemetry.sdk.trace import TracerProvider 
+from opentelemetry.sdk.trace.export import BatchSpanProcessor 
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor 
+from opentelemetry.sdk.resources import Resource 
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter 
+
+
 app = FastAPI()
+
+# Define a resource to identify our service
+resource = Resource(attributes={
+    "service.name": "the-app" 
+})
+
+# Configure the OTLP exporter to send traces to our collector
+otlp_exporter = OTLPSpanExporter(
+    endpoint="otel-collector:4317", # The collector's gRPC endpoint
+    insecure=True 
+)
+
+# Set up the tracer provider
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer = trace.get_tracer(__name__)
+
+# Create a BatchSpanProcessor to send traces in batches
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Instrument the app automatically
+FastAPIInstrumentor.instrument_app(app)
+
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.INFO)
 

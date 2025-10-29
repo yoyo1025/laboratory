@@ -117,6 +117,28 @@ services:
       - ./grafana/config.monitoring
     networks:
       edge1-network: {}
+  edge1-otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collection-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"  # OTLP gRPC receiver
+    networks:
+      edge1-network: {}
+    depends_on:
+      - edge1-tempo
+  edge1-tempo:
+    image: grafana/tempo:latest
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"   # Tempo UI
+    networks:
+      edge1-network: {}
 volumes:
   mysql_data:
 

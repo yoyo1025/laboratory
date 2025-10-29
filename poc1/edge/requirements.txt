@@ -11,3 +11,8 @@ sqlalchemy
 mysqlclient
 minio
 prometheus-fastapi-instrumentator
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-requests
+opentelemetry-exporter-otlp-proto-grpc

@@ -47,3 +47,11 @@ datasources:
     version: 1
     # <bool> allow users to edit datasources from the UI.
     editable: true
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://edge1-tempo:3200
+    isDefault: false
+    jsonData:
+      serviceMap:
+        datasourceUid: 'Prometheus'
