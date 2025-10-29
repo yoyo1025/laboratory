@@ -67,7 +67,7 @@ services:
        MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-minio_password}"
        MINIO_PROMETHEUS_AUTH_TYPE: "public"
        MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI:-on}"
-       MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://api:8000/minio/webhook}"
+       MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://edge1-api:8000/minio/webhook}"
     command: server --console-address ":9001" /export
     volumes:
       - ./docker/minio/data:/export
