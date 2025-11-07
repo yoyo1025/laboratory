@@ -47,3 +47,17 @@ datasources:
     version: 1
     # <bool> allow users to edit datasources from the UI.
     editable: true
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://cloud-tempo:3200
+    isDefault: false
+    jsonData:
+      serviceMap:
+        datasourceUid: 'Prometheus'
+  - uid: local-pyroscope
+    type: grafana-pyroscope-datasource
+    name: Pyroscope
+    url: http://cloud-pyroscope:4040
+    jsonData:
+      keepCookies: [pyroscope_git_session]

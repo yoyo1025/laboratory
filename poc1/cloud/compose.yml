@@ -122,6 +122,37 @@ services:
     networks:
       cloud-network:
         ipv4_address: 172.16.239.12
+  cloud-otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collection-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4327:4317"  # OTLP gRPC receiver
+    networks:
+      cloud-network: {}
+    depends_on:
+      - cloud-tempo
+  cloud-tempo:
+    image: grafana/tempo:latest
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3300:3200"   # Tempo UI
+    networks:
+      cloud-network: {}
+  cloud-pyroscope:
+    image: grafana/pyroscope:latest
+    ports:
+      - "4140:4040"
+    command:
+      - "server"
+    restart: unless-stopped
+    networks:
+      cloud-network: {}
 volumes:
   cloud_mysql_data:
 

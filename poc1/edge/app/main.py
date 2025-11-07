@@ -33,7 +33,7 @@ app = FastAPI()
 
 # Define a resource to identify our service
 resource = Resource(attributes={
-    "service.name": "the-app" 
+    "service.name": "edge1-app" 
 })
 
 # Configure the OTLP exporter to send traces to our collector
