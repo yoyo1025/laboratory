@@ -6,7 +6,7 @@ from typing import Generator
 
 db_user = os.getenv("DB_USER", "sample_user")
 db_pass = urllib.parse.quote_plus(os.getenv("DB_PASSWORD", "sample_password"))
-db_host = os.getenv("DB_HOST", "edge1-mysql")
+db_host = os.getenv("DB_HOST", "edge2-mysql")
 db_port = os.getenv("DB_PORT", "3306")
 db_name = os.getenv("DB_NAME", "sample_db")
 

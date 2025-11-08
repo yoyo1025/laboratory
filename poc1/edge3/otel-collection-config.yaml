@@ -8,7 +8,7 @@ receivers:
 
 exporters:
   otlp/tempo:
-    endpoint: "edge1-tempo:4317"
+    endpoint: "edge3-tempo:4317"
     tls:
       insecure: true
 

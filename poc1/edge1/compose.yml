@@ -155,6 +155,7 @@ networks:
   edge1-network:
     name: edge1-network
     driver: bridge
+    external: true
     ipam:
       config:
         - subnet: 172.16.238.0/24

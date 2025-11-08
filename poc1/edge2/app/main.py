@@ -33,12 +33,12 @@ app = FastAPI()
 
 # Define a resource to identify our service
 resource = Resource(attributes={
-    "service.name": "edge1-app" 
+    "service.name": "edge2-app" 
 })
 
 # Configure the OTLP exporter to send traces to our collector
 otlp_exporter = OTLPSpanExporter(
-    endpoint="edge1-otel-collector:4317", # The collector's gRPC endpoint
+    endpoint="edge2-otel-collector:4317", # The collector's gRPC endpoint
     insecure=True 
 )
 
@@ -55,14 +55,14 @@ FastAPIInstrumentor.instrument_app(app)
 
 pyroscope.configure( 
   application_name = "backend" , 
-  server_address = "http://edge1-pyroscope:4040" , 
+  server_address = "http://edge2-pyroscope:4040" , 
 ) 
 
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.INFO)
 
 # ローカルMinioクライアント初期化
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "edge1-minio:9000")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "edge2-minio:9000")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio_root")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio_password")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
