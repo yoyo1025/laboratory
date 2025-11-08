@@ -75,7 +75,7 @@ CLOUD_MINIO_SECRET_KEY = os.getenv("CLOUD_MINIO_SECRET_KEY", "minio_password")
 CLOUD_MINIO_SECURE = os.getenv("CLOUD_MINIO_SECURE", "false").lower() == "true"
 mc_cloud = Minio(CLOUD_MINIO_ENDPOINT, CLOUD_MINIO_ACCESS_KEY, CLOUD_MINIO_SECRET_KEY, secure=CLOUD_MINIO_SECURE)
 
-LOCAL_BUCKET = "local-point-cloud"
+LOCAL_BUCKET = "edge1-point-cloud"
 CLOUD_BUCKET = "cloud-point-cloud"
 
 class  PyroscopeRoute ( APIRoute ): 
