@@ -79,7 +79,7 @@ services:
     entrypoint: ["/bin/sh", "-lc"]
     command: |
       mc alias set local http://edge1-minio:9000 minio_root minio_password && \
-      mc anonymous set public local/local-point-cloud || true && \
+      mc anonymous set public local/edge3-point-cloud || true && \
       sleep infinity
     networks:
       edge1-network: {}

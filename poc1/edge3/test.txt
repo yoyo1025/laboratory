@@ -1,10 +1,10 @@
 hello world!
 
-curl http://localhost:9004/local-point-cloud/tmp/x-34-70011159734301-y-137-73557007483018-8.ply -o x-34-70011159734301-y-137-73557007483018-8.ply
+curl http://localhost:9004/edge3-point-cloud/tmp/x-34-70011159734301-y-137-73557007483018-8.ply -o x-34-70011159734301-y-137-73557007483018-8.ply
 
 curl -X PUT \
      --upload-file x-34-70011159734301-y-137-73557007483018-8.ply \
-     http://localhost:9004/local-point-cloud/tmp/x-34-70011159734301-y-137-73557007483018-8.ply
+     http://localhost:9004/edge3-point-cloud/tmp/x-34-70011159734301-y-137-73557007483018-8.ply
 
 
-curl -X PUT --upload-file sample.ply http://localhost:9004/local-point-cloud/tmp/xn1vqhzy/955af428568545d2/x+34-70011159734301-y+137-73557007483018-8.ply 
+curl -X PUT --upload-file sample.ply http://localhost:9004/edge3-point-cloud/tmp/xn1vqhzy/955af428568545d2/x+34-70011159734301-y+137-73557007483018-8.ply 

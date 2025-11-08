@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from repository.alignment_repository import AlignmentRepository
 from db import SessionLocal      
 
-BUCKET = "local-point-cloud"
+BUCKET = "edge3-point-cloud"
 VOXEL = 0.1
 DIST_RANSAC = VOXEL * 1.0
 DIST_ICP    = VOXEL * 0.5

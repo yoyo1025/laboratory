@@ -8,7 +8,7 @@ import open3d as o3d
 import numpy as np
 
 CLOUD_OBJECT_EXT = os.getenv("CLOUD_OBJECT_EXT", ".ply")
-LOCAL_BUCKET = "local-point-cloud"
+LOCAL_BUCKET = "edge3-point-cloud"
 CLOUD_BUCKET = "cloud-point-cloud"
 VOXEL = 0.15
 

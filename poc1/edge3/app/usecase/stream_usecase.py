@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from typing import Tuple
 import requests
 
-LOCAL_BUCKET_DEFAULT = "local-point-cloud"
+LOCAL_BUCKET_DEFAULT = "edge3-point-cloud"
 CLOUD_BUCKET_DEFAULT = "cloud-point-cloud"
 
 NOT_FOUND_CODES = {"NoSuchKey", "NoSuchObject", "NotFound", "NoSuchBucket"}
