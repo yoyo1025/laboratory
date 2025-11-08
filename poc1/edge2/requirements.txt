@@ -1,0 +1,19 @@
+fastapi
+uvicorn
+psycopg2-binary
+numpy==1.26.0
+open3d==0.18.0      # headless ビルド
+pygeohash           # GeoHash
+python-multipart
+pydantic
+mysql-connector-python
+sqlalchemy
+mysqlclient
+minio
+prometheus-fastapi-instrumentator
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-requests
+opentelemetry-exporter-otlp-proto-grpc
+pyroscope-io
