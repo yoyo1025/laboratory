@@ -80,6 +80,7 @@ services:
     command: |
       mc alias set local http://edge1-minio:9000 minio_root minio_password && \
       mc anonymous set public local/edge1-point-cloud || true && \
+      mc event add local/edge1-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply" && \
       sleep infinity
     networks:
       edge1-network: {}
