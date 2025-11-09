@@ -73,16 +73,6 @@ services:
       - ./docker/minio/data:/export
     networks:
       edge2-network: {}
-  edge2-mc:
-    image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
-    depends_on: [edge2-minio, edge2-api]
-    entrypoint: ["/bin/sh", "-lc"]
-    command: |
-      mc alias set local http://edge2-minio:9000 minio_root minio_password && \
-      mc anonymous set public local/edge2-point-cloud || true && \
-      sleep infinity
-    networks:
-      edge2-network: {}
   edge2-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0
     volumes:
