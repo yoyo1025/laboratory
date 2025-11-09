@@ -92,8 +92,6 @@ class  PyroscopeRoute ( APIRoute ):
 
 api_router = APIRouter(prefix= "" , route_class=PyroscopeRoute) 
 
-app.include_router(api_router) 
-
 @app.on_event("startup")
 async def _start_sync():
     app.state.sync_task = asyncio.create_task(BatchUsecase(mc, mc_cloud).periodic_sync_loop())
@@ -284,5 +282,7 @@ def prepare_upload(payload: UploadPrepareRequest):
         "filename": filename,
         "geohash": geohash,
     }
+
+app.include_router(api_router)
 
 Instrumentator().instrument(app).expose(app)
