@@ -5,7 +5,7 @@ from urllib.parse import unquote
 from minio import Minio
 from usecase.aligmnent_usecase import AligmentUsecase
 import open3d as o3d
-import os, asyncio, tempfile, logging, secrets
+import os, asyncio, tempfile, secrets
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone, datetime
@@ -58,8 +58,8 @@ pyroscope.configure(
   server_address = "http://edge3-pyroscope:4040" , 
 ) 
 
-logger = logging.getLogger("uvicorn")
-logger.setLevel(logging.INFO)
+# logger = logging.getLogger("uvicorn")
+# logger.setLevel(logging.INFO)
 
 # ローカルMinioクライアント初期化
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "edge3-minio:9000")
@@ -130,8 +130,8 @@ def handle_record_sync(rec, mc: Minio):
         try: os.remove(tmp)
         except FileNotFoundError: pass
 
-    print("INFO: bucket:", bucket)
-    print("INFO: object key:", key)
+    print("MEMO: bucket:", bucket)
+    print("MEMO: object key:", key)
     AligmentUsecase(pc, mc, s3).execute(key)
 
 @api_router.post("/minio/webhook")

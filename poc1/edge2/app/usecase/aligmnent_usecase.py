@@ -41,7 +41,7 @@ class AligmentUsecase:
         y = abs(float(f"{m.group(5)}.{m.group(6)}"))  # 経度
         level = int(m.group(7))
         geohash = pygeohash.encode(latitude=x, longitude=y, precision=level)
-        print(f"INFO: extracted: lat={x}, lon={y}, level={level} -> geohash={geohash}")
+        print(f"MEMO: extracted: lat={x}, lon={y}, level={level} -> geohash={geohash}")
         return geohash
 
     # geohashに基づく保存先（uploads/latest）
@@ -58,7 +58,7 @@ class AligmentUsecase:
 
         # 履歴にオリジナルをまず保存
         self.alignment_repository.copy_to_uploads(BUCKET, src_key, upload_key)
-        # print(f"INFO: copied original to s3://{BUCKET}/{upload_key}")
+        # print(f"MEMO: copied original to s3://{BUCKET}/{upload_key}")
 
         # latest が無ければ初期化（マージなし）
         if self.alignment_repository.check_folder_exists(BUCKET, latest_key) is None:
@@ -68,7 +68,7 @@ class AligmentUsecase:
                 self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
             finally:
                 db.close()
-            print("INFO: latest not found, initialized")
+            print("MEMO: latest not found, initialized")
             print(f"initialized latest at s3://{BUCKET}/{latest_key}")
             print(f"done in {time.time() - start:.2f}s (initialized)")
             return
@@ -140,8 +140,8 @@ class AligmentUsecase:
             self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
         finally:
             db.close()
-        print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
-        print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
-        print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
-        print(f"done in {time.time() - start:.2f}s")
-
+        # print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
+        # print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
+        # print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
+        print(f"MEMO: done in {time.time() - start:.2f}s")
+        print("RESULT: merged and uploaded to s3")
