@@ -19,6 +19,11 @@ services:
     networks:
       cloud-network:
         ipv4_address: 172.16.239.10
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "2G"
   cloud-mysql:
     image: "mysql:8.0"
     container_name: "cloud_mysql_poc1"
@@ -73,6 +78,11 @@ services:
       - ./docker/minio/data:/export
     networks:
       cloud-network: null
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
   cloud-mc:
     image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
     depends_on: [cloud-minio, cloud-api]
