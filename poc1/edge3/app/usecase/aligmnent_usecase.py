@@ -143,6 +143,9 @@ class AligmentUsecase:
         # print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
         # print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
         # print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
-        print(f"MEMO: done in {time.time() - start:.2f}s")
+        dt = datetime.now()
+        datetime_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+        print(datetime_str)
+        # print(f"MEMO: done in {time.time() - start:.2f}s")
         print("RESULT: merged and uploaded to s3")
 

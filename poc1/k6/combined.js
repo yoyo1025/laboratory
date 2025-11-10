@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check, sleep } from 'k6';
+import { check } from 'k6';
 
 const EDGE_TARGETS = [
   { name: 'edge1', api: 'http://localhost:8000', minio: 'http://localhost:9000' },
@@ -31,14 +31,16 @@ const buildMinioPutUrl = (minioBase, bucket, objectKey) => {
 
 export const options = {
   scenarios: {
-    // アップロード系：一定VUsで回す
     pointcloud_upload: {
-      executor: 'constant-vus',
-      vus: 3,
+      executor: 'constant-arrival-rate',
+      rate: 1,
+      timeUnit: '10s',
       duration: '5m',
+      preAllocatedVUs: 2,
+      maxVUs: 6,
       exec: 'uploadScenario',
     },
-    // 取得系：一定到着率で回す（5秒に1回）
+
     pointcloud_fetch: {
       executor: 'constant-arrival-rate',
       rate: 1,
@@ -50,6 +52,7 @@ export const options = {
     },
   },
 };
+
 
 /**
  * =====================================
@@ -85,7 +88,7 @@ export function uploadScenario() {
 
   const okPrepare = assert(prepareRes, 'upload prepare succeeded', (r) => r.status === 200);
   if (!okPrepare) {
-    sleep(15);
+    // sleep(15);
     return;
   }
 
@@ -94,14 +97,14 @@ export function uploadScenario() {
   try {
     info = prepareRes.json();
   } catch (_e) {
-    sleep(15);
+    // sleep(15);
     return;
   }
 
   const bucket = info?.bucket;
   const objectKey = info?.object_key;
   if (typeof bucket !== 'string' || typeof objectKey !== 'string') {
-    sleep(15);
+    // sleep(15);
     return;
   }
 
@@ -114,7 +117,7 @@ export function uploadScenario() {
   assert(putRes, 'point cloud upload succeeded', (r) => r.status >= 200 && r.status < 300);
 
   // 3) クールダウン
-  sleep(15);
+  // sleep(15);
 }
 
 /**
@@ -139,5 +142,5 @@ export function fetchScenario() {
 
   assert(res, 'GET pointcloud succeeded or 404', (r) => r.status === 200 || r.status === 404);
 
-  sleep(5);
+  // sleep(5);
 }
