@@ -35,7 +35,7 @@ export const options = {
     pointcloud_upload: {
       executor: 'constant-vus',
       vus: 3,
-      duration: '1m',
+      duration: '5m',
       exec: 'uploadScenario',
     },
     // 取得系：一定到着率で回す（5秒に1回）
@@ -43,7 +43,7 @@ export const options = {
       executor: 'constant-arrival-rate',
       rate: 1,
       timeUnit: '5s',
-      duration: '1m',
+      duration: '5m',
       preAllocatedVUs: 2,
       maxVUs: 6,
       exec: 'fetchScenario',
