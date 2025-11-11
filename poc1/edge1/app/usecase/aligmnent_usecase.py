@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pygeohash
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from repository.alignment_repository import AlignmentRepository
 from db import SessionLocal      
 
@@ -147,8 +147,9 @@ class AligmentUsecase:
         # print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
         # print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
         # 現在時刻を取得
-        dt = datetime.now()
-        datetime_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-        print(datetime_str)
+        JST = timezone(timedelta(hours=9))
+        now_jst = datetime.now(JST)
+        unix_time = int(now_jst.timestamp())
+        print(unix_time)
         # print(f"{datetime_str} MEMO: done in {time.time() - start:.2f}s")
         print("RESULT: merged and uploaded to s3")
