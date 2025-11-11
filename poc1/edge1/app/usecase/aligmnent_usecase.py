@@ -39,7 +39,10 @@ class AligmentUsecase:
             raise ValueError(f"key format invalid: {basename}")
         x = abs(float(f"{m.group(2)}.{m.group(3)}"))  # 緯度
         y = abs(float(f"{m.group(5)}.{m.group(6)}"))  # 経度
-        level = int(m.group(7))
+        requested_level = int(m.group(7))
+        level = max(1, min(12, requested_level))
+        if level != requested_level:
+            print(f"MEMO: requested geohash level {requested_level} is out of range; clamped to {level}")
         geohash = pygeohash.encode(latitude=x, longitude=y, precision=level)
         print(f"MEMO: extracted: lat={x}, lon={y}, level={level} -> geohash={geohash}")
         return geohash
@@ -149,4 +152,3 @@ class AligmentUsecase:
         print(datetime_str)
         # print(f"{datetime_str} MEMO: done in {time.time() - start:.2f}s")
         print("RESULT: merged and uploaded to s3")
-
