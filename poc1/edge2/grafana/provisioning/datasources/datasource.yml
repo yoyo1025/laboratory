@@ -16,7 +16,7 @@ datasources:
     # <int> org id. will default to orgId 1 if not specified
     orgId: 1
     # <string> url
-    url: http://cloud-prometheus:9090
+    url: http://edge2-prometheus:9090
     # <string> database password, if used
     password:
     # <string> database user, if used
@@ -50,7 +50,7 @@ datasources:
   - name: Tempo
     type: tempo
     access: proxy
-    url: http://cloud-tempo:3200
+    url: http://edge2-tempo:3200
     isDefault: false
     jsonData:
       serviceMap:
@@ -58,6 +58,6 @@ datasources:
   - uid: local-pyroscope
     type: grafana-pyroscope-datasource
     name: Pyroscope
-    url: http://cloud-pyroscope:4040
+    url: http://edge2-pyroscope:4040
     jsonData:
       keepCookies: [pyroscope_git_session]

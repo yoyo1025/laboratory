@@ -5,14 +5,14 @@ import os
 import numpy as np
 import pygeohash
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from repository.alignment_repository import AlignmentRepository
 from db import SessionLocal      
 
-BUCKET = "local-point-cloud"   # バケット名（固定）
-VOXEL = 0.1                    # 10cm
-DIST_RANSAC = VOXEL * 1.0      # RANSAC 対応距離（10cm）
-DIST_ICP    = VOXEL * 0.5      # ICP   対応距離（5cm）
+BUCKET = "edge2-point-cloud"
+VOXEL = 0.1
+DIST_RANSAC = VOXEL * 1.0
+DIST_ICP    = VOXEL * 0.5
 
 
 def utc_ts():
@@ -143,7 +143,12 @@ class AligmentUsecase:
             self.alignment_repository.save_pc_metadata(db, geohash, len(geohash), os.path.basename(upload_key), upload_key, self.s3.get("object", {}).get("size"), "application/octet-stream")
         finally:
             db.close()
-        print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
-        print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
-        print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
-        print(f"done in {time.time() - start:.2f}s")
+        # print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
+        # print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
+        # print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
+        JST = timezone(timedelta(hours=9))
+        now_jst = datetime.now(JST)
+        unix_time = int(now_jst.timestamp())
+        print(unix_time)
+        # print(f"{datetime_str} MEMO: done in {time.time() - start:.2f}s")
+        print("RESULT: merged and uploaded to s3")

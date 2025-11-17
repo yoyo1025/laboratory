@@ -10,7 +10,47 @@ from usecase.stream_usecase import StreamUsecase
 from datetime import timezone
 from prometheus_fastapi_instrumentator import Instrumentator
 
+# Tempo 用ライブラリ
+from opentelemetry import trace 
+from opentelemetry.sdk.trace import TracerProvider 
+from opentelemetry.sdk.trace.export import BatchSpanProcessor 
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor 
+from opentelemetry.sdk.resources import Resource 
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter 
+
+# Pyroscope 用ライブラリ
+import pyroscope
+
 app = FastAPI()
+
+# Define a resource to identify our service
+resource = Resource(attributes={
+    "service.name": "cloud-app" 
+})
+
+
+# Configure the OTLP exporter to send traces to our collector
+otlp_exporter = OTLPSpanExporter(
+    endpoint="cloud-otel-collector:4317", # The collector's gRPC endpoint
+    insecure=True 
+)
+
+# Set up the tracer provider
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer = trace.get_tracer(__name__)
+
+# Create a BatchSpanProcessor to send traces in batches
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Instrument the app automatically
+FastAPIInstrumentor.instrument_app(app)
+
+pyroscope.configure( 
+  application_name = "backend" , 
+  server_address = "http://cloud-pyroscope:4040" , 
+) 
+
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.INFO)
     
