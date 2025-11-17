@@ -17,6 +17,7 @@ from db import SessionLocal
 from repository.upload_reservation_repository import UploadReservationRepository
 from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.routing import APIRoute 
+from logging_utils import log_duration, logger
 
 # Tempo 用ライブラリ
 from opentelemetry import trace 
@@ -107,45 +108,56 @@ async def _stop_sync():
             pass
         
 def handle_record_sync(rec, mc: Minio):
-    s3 = rec.get("s3", {})
-    bucket = s3.get("bucket", {}).get("name")
-    key = s3.get("object", {}).get("key")
-    event = rec.get("eventName", "")
+    with pyroscope.tag_wrapper({"endpoint": "POST:/minio/webhook", "job": "handle_record_sync"}):
+        s3 = rec.get("s3", {})
+        bucket = s3.get("bucket", {}).get("name")
+        key = s3.get("object", {}).get("key")
+        event = rec.get("eventName", "")
 
-    if not bucket or not key:
-        return
-    key = unquote(key)
+        if not bucket or not key:
+            logger.info("webhook.invalid_record: 0.000s")
+            return
+        key = unquote(key)
 
-    # tmp/ の .ply の put だけを処理
-    if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
-        return
+        # tmp/ の .ply の put だけを処理
+        if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
+            logger.info("webhook.skipped_event: 0.000s")
+            return
 
-    # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
-    with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
-        tmp = tf.name
-    try:
-        mc.fget_object(bucket, key, tmp)
-        pc = o3d.io.read_point_cloud(tmp)
-    finally:
-        try: os.remove(tmp)
-        except FileNotFoundError: pass
+        with log_duration("webhook.task_total"):
+            # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
+            with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
+                tmp = tf.name
+            try:
+                with log_duration("webhook.download_object"):
+                    mc.fget_object(bucket, key, tmp)
+                with log_duration("webhook.read_point_cloud"):
+                    pc = o3d.io.read_point_cloud(tmp)
+            finally:
+                try: os.remove(tmp)
+                except FileNotFoundError: pass
 
-    print("MEMO: bucket:", bucket)
-    print("MEMO: object key:", key)
-    AligmentUsecase(pc, mc, s3).execute(key)
+            print("MEMO: bucket:", bucket)
+            print("MEMO: object key:", key)
+            with log_duration("webhook.alignment_execute"):
+                AligmentUsecase(pc, mc, s3).execute(key)
 
 @api_router.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
-    try:
-        body = await request.json()
-    except Exception:
+    with log_duration("webhook.total"):
         body = {}
+        try:
+            with log_duration("webhook.parse_json"):
+                body = await request.json()
+        except Exception:
+            body = {}
 
-    records = body.get("Records", [body]) if isinstance(body, dict) else []
-    for rec in records:
-        background.add_task(handle_record_sync, rec, mc)
+        records = body.get("Records", [body]) if isinstance(body, dict) else []
+        with log_duration("webhook.schedule_background_tasks"):
+            for rec in records:
+                background.add_task(handle_record_sync, rec, mc)
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @api_router.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
