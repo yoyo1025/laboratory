@@ -1,7 +1,6 @@
 from minio import Minio
 import open3d as o3d
 import os
-import numpy as np
 import pygeohash
 import re
 from datetime import datetime, timezone, timedelta
