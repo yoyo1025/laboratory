@@ -90,69 +90,69 @@ class AligmentUsecase:
             base_pc = self.alignment_repository.download_ply(BUCKET, latest_key)
         
         # 前処理
-        with log_duration("alignment.preprocess_base"):
-            base_pc_preprocessed  = self.preprocess(base_pc)
-        with log_duration("alignment.preprocess_merge"):
-            merge_pc_preprocessed = self.preprocess(self.merge_pc)
+        # with log_duration("alignment.preprocess_base"):
+        #     base_pc_preprocessed  = self.preprocess(base_pc)
+        # with log_duration("alignment.preprocess_merge"):
+        #     merge_pc_preprocessed = self.preprocess(self.merge_pc)
 
         # 特徴量計算
-        with log_duration("alignment.compute_fpfh_base"):
-            fpfh1 = o3d.pipelines.registration.compute_fpfh_feature(
-                base_pc_preprocessed,
-                o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*5, max_nn=100)
-            )
-        with log_duration("alignment.compute_fpfh_merge"):
-            fpfh2 = o3d.pipelines.registration.compute_fpfh_feature(
-                merge_pc_preprocessed,
-                o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*5, max_nn=100)
-            )
+        # with log_duration("alignment.compute_fpfh_base"):
+        #     fpfh1 = o3d.pipelines.registration.compute_fpfh_feature(
+        #         base_pc_preprocessed,
+        #         o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*5, max_nn=100)
+        #     )
+        # with log_duration("alignment.compute_fpfh_merge"):
+        #     fpfh2 = o3d.pipelines.registration.compute_fpfh_feature(
+        #         merge_pc_preprocessed,
+        #         o3d.geometry.KDTreeSearchParamHybrid(radius=VOXEL*5, max_nn=100)
+        #     )
 
         # RANSAC
-        with log_duration("alignment.ransac"):
-            result_ransac = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-                merge_pc_preprocessed,                  # source
-                base_pc_preprocessed,                   # target
-                fpfh2, fpfh1,                           # source_feature, target_feature
-                mutual_filter=True,
-                max_correspondence_distance=DIST_RANSAC,
-                estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-                ransac_n=4,
-                checkers=[
-                    o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9),
-                    o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(DIST_RANSAC)
-                ],
-                criteria=o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 1000)
-            )
-        print("RANSAC fitness:", result_ransac.fitness)
+        # with log_duration("alignment.ransac"):
+        #     result_ransac = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+        #         merge_pc_preprocessed,                  # source
+        #         base_pc_preprocessed,                   # target
+        #         fpfh2, fpfh1,                           # source_feature, target_feature
+        #         mutual_filter=True,
+        #         max_correspondence_distance=DIST_RANSAC,
+        #         estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
+        #         ransac_n=4,
+        #         checkers=[
+        #             o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9),
+        #             o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(DIST_RANSAC)
+        #         ],
+        #         criteria=o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 1000)
+        #     )
+        # print("RANSAC fitness:", result_ransac.fitness)
 
         # ICP
-        with log_duration("alignment.icp"):
-            result_icp = o3d.pipelines.registration.registration_icp(
-                merge_pc_preprocessed,                  # source
-                base_pc_preprocessed,                   # target
-                max_correspondence_distance=DIST_ICP,
-                init=result_ransac.transformation,
-                estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPlane()
-            )
-        print("ICP fitness   :", result_icp.fitness)
-        print("RMSE          :", result_icp.inlier_rmse)
+        # with log_duration("alignment.icp"):
+        #     result_icp = o3d.pipelines.registration.registration_icp(
+        #         merge_pc_preprocessed,                  # source
+        #         base_pc_preprocessed,                   # target
+        #         max_correspondence_distance=DIST_ICP,
+        #         init=result_ransac.transformation,
+        #         estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPlane()
+        #     )
+        # print("ICP fitness   :", result_icp.fitness)
+        # print("RMSE          :", result_icp.inlier_rmse)
         
         # 座標変換
-        with log_duration("alignment.transform_full_resolution"):
-            T = result_icp.transformation
-            merge_aligned = o3d.geometry.PointCloud(self.merge_pc)  # フル解像を変換
-            merge_aligned.transform(T)
+        # with log_duration("alignment.transform_full_resolution"):
+        #     T = result_icp.transformation
+        #     merge_aligned = o3d.geometry.PointCloud(self.merge_pc)  # フル解像を変換
+        #     merge_aligned.transform(T)
 
         # 新規分を真っ赤に（動作確認のため）
-        n = len(merge_aligned.points)
-        if n > 0:
-            merge_aligned.colors = o3d.utility.Vector3dVector(
-                np.tile([1.0, 0.0, 0.0], (n, 1))
-            )
+        # n = len(merge_aligned.points)
+        # if n > 0:
+        #     merge_aligned.colors = o3d.utility.Vector3dVector(
+        #         np.tile([1.0, 0.0, 0.0], (n, 1))
+        #     )
 
         # 合成
-        with log_duration("alignment.merge_point_clouds"):
-            merged = base_pc + merge_aligned
+        # with log_duration("alignment.merge_point_clouds"):
+        merged = base_pc + self.merge_pc
 
         # 保存
         with log_duration("alignment.upload_latest"):
