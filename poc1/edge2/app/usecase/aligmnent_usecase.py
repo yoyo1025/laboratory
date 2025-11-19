@@ -151,7 +151,8 @@ class AligmentUsecase:
 
         # 合成
         # with log_duration("alignment.merge_point_clouds"):
-        merged = base_pc + self.merge_pc
+        # merge結果をベース点群として書き換え（同じデータサイズで実験を進めるため）
+        merged = base_pc
 
         # 保存
         with log_duration("alignment.upload_latest"):
