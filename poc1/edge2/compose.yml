@@ -28,6 +28,7 @@ services:
         limits:
           cpus: "2.5"
           memory: "4G"
+    restart: always
   edge2-mysql:
     image: "mysql:8.0"
     environment:
