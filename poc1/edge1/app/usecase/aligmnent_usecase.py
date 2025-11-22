@@ -53,7 +53,7 @@ class AligmentUsecase:
         upload_key  = f"{base_prefix}/uploads/{utc_ts()}-{os.path.basename(src_key)}"
         return base_prefix, latest_key, upload_key
 
-    def execute(self, src_key: str):
+    def execute(self, src_key: str, request_id: str, start_time: int):
         with log_duration("alignment.calc_geohash"):
             geohash = self.calc_geohash(src_key)
         base_prefix, latest_key, upload_key = self._paths(geohash, src_key)
@@ -174,10 +174,15 @@ class AligmentUsecase:
         # print("[debug] base points:", len(base_pc.points), "colors:", base_pc.has_colors(), "normals:", base_pc.has_normals())
         # print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
         # print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
+        
+        print(f"request_{request_id}: end")
+        
         # 現在時刻を取得
         JST = timezone(timedelta(hours=9))
         now_jst = datetime.now(JST)
         unix_time = int(now_jst.timestamp())
         print(unix_time)
+        end_time = int(now_jst.timestamp() * 1000)
+        print(f"processed_time: {end_time-start_time}")
         # print(f"{datetime_str} MEMO: done in {time.time() - start:.2f}s")
         print("RESULT: merged and uploaded to s3")

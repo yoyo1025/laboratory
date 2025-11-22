@@ -18,6 +18,10 @@ from repository.upload_reservation_repository import UploadReservationRepository
 from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.routing import APIRoute 
 from logging_utils import log_duration, logger
+import random
+import string
+from datetime import datetime, timezone, timedelta
+
 
 # Tempo 用ライブラリ
 from opentelemetry import trace 
@@ -107,7 +111,7 @@ async def _stop_sync():
         except asyncio.CancelledError:
             pass
         
-def handle_record_sync(rec, mc: Minio):
+def handle_record_sync(rec, mc: Minio, request_id: str, start_time: int):
     with pyroscope.tag_wrapper({"endpoint": "POST:/minio/webhook", "job": "handle_record_sync"}):
         s3 = rec.get("s3", {})
         bucket = s3.get("bucket", {}).get("name")
@@ -138,10 +142,20 @@ def handle_record_sync(rec, mc: Minio):
 
         print("MEMO: bucket:", bucket)
         print("MEMO: object key:", key)
-        AligmentUsecase(pc, mc, s3).execute(key)
+        AligmentUsecase(pc, mc, s3).execute(key, request_id, start_time)
 
 @api_router.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
+    # リクエストIDを表示
+    request_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    print(f"request_{request_id}: start")
+    # 処理開始時刻算出
+    JST = timezone(timedelta(hours=9))
+    now_jst = datetime.now(JST)
+
+    start_time = int(now_jst.timestamp() * 1000)
+
+    
     body = {}
     try:
         with log_duration("webhook.parse_json"):
@@ -150,9 +164,8 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
         body = {}
 
     records = body.get("Records", [body]) if isinstance(body, dict) else []
-    with log_duration("webhook.schedule_background_tasks"):
-        for rec in records:
-            background.add_task(handle_record_sync, rec, mc)
+    for rec in records:
+        background.add_task(handle_record_sync, rec, mc, request_id, start_time)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
