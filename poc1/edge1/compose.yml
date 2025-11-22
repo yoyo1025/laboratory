@@ -79,11 +79,11 @@ services:
       - ./docker/minio/data:/export
     networks:
       edge1-network: {}
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: "1G"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1.0"
+    #       memory: "2G"
   edge1-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0
     volumes:

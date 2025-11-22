@@ -33,23 +33,23 @@ export const options = {
   scenarios: {
     pointcloud_upload: {
       executor: 'constant-arrival-rate',
-      rate: 5,
+      rate: 80,
       timeUnit: '1s',
       duration: '5m',
-      preAllocatedVUs: 2,
-      maxVUs: 6,
+      preAllocatedVUs: 10000,
+      maxVUs: 10000,
       exec: 'uploadScenario',
     },
 
-    pointcloud_fetch: {
-      executor: 'constant-arrival-rate',
-      rate: 1,
-      timeUnit: '1s',
-      duration: '5m',
-      preAllocatedVUs: 2,
-      maxVUs: 6,
-      exec: 'fetchScenario',
-    },
+    // pointcloud_fetch: {
+    //   executor: 'constant-arrival-rate',
+    //   rate: 1,
+    //   timeUnit: '1s',
+    //   duration: '5m',
+    //   preAllocatedVUs: 2,
+    //   maxVUs: 6,
+    //   exec: 'fetchScenario',
+    // },
   },
 };
 
