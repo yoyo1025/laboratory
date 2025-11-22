@@ -17,6 +17,11 @@ from db import SessionLocal
 from repository.upload_reservation_repository import UploadReservationRepository
 from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.routing import APIRoute 
+from logging_utils import log_duration, logger
+import random
+import string
+from datetime import datetime, timezone, timedelta
+
 
 # Tempo 用ライブラリ
 from opentelemetry import trace 
@@ -106,44 +111,62 @@ async def _stop_sync():
         except asyncio.CancelledError:
             pass
         
-def handle_record_sync(rec, mc: Minio):
-    s3 = rec.get("s3", {})
-    bucket = s3.get("bucket", {}).get("name")
-    key = s3.get("object", {}).get("key")
-    event = rec.get("eventName", "")
+def handle_record_sync(rec, mc: Minio, request_id: str, start_time: int):
+    with pyroscope.tag_wrapper({"endpoint": "POST:/minio/webhook", "job": "handle_record_sync"}):
+        s3 = rec.get("s3", {})
+        bucket = s3.get("bucket", {}).get("name")
+        key = s3.get("object", {}).get("key")
+        event = rec.get("eventName", "")
 
-    if not bucket or not key:
-        return
-    key = unquote(key)
+        if not bucket or not key:
+            logger.info("webhook.invalid_record: 0.000s")
+            return
+        key = unquote(key)
 
-    # tmp/ の .ply の put だけを処理
-    if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
-        return
+        # tmp/ の .ply の put だけを処理
+        if not str(event).startswith("s3:ObjectCreated") or not key.endswith(".ply") or not key.startswith("tmp/"):
+            logger.info("webhook.skipped_event: 0.000s")
+            return
+        
+        # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
+        with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
+            tmp = tf.name
+        try:
+            with log_duration("webhook.download_object"):
+                mc.fget_object(bucket, key, tmp)
+            with log_duration("webhook.read_point_cloud"):
+                pc = o3d.io.read_point_cloud(tmp)
+        finally:
+            try: os.remove(tmp)
+            except FileNotFoundError: pass
 
-    # 一時DL → Open3D で読み込み（整列・マージはフル解像で）
-    with tempfile.NamedTemporaryFile(suffix=".ply", delete=False) as tf:
-        tmp = tf.name
-    try:
-        mc.fget_object(bucket, key, tmp)
-        pc = o3d.io.read_point_cloud(tmp)
-    finally:
-        try: os.remove(tmp)
-        except FileNotFoundError: pass
-
-    print("MEMO: bucket:", bucket)
-    print("MEMO: object key:", key)
-    AligmentUsecase(pc, mc, s3).execute(key)
+        print("MEMO: bucket:", bucket)
+        print("MEMO: object key:", key)
+        AligmentUsecase(pc, mc, s3).execute(key, request_id, start_time)
 
 @api_router.post("/minio/webhook")
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
+    # リクエストIDを表示
+    request_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    print(f"request_{request_id}: start")
+    # 処理開始時刻算出
+    # JST = timezone(timedelta(hours=9))
+    # now_jst = datetime.now(JST)
 
-    records = body.get("Records", [body]) if isinstance(body, dict) else []
-    for rec in records:
-        background.add_task(handle_record_sync, rec, mc)
+    # start_time = int(now_jst.timestamp() * 1000)
+    # end_time = int(now_jst.timestamp() * 1000)
+    # print(f"processed_time: {end_time-start_time}")
+    
+    # body = {}
+    # try:
+    #     with log_duration("webhook.parse_json"):
+    #         body = await request.json()
+    # except Exception:
+    #     body = {}
+
+    # records = body.get("Records", [body]) if isinstance(body, dict) else []
+    # for rec in records:
+    #     background.add_task(handle_record_sync, rec, mc, request_id, start_time)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -243,6 +266,13 @@ def _build_filename(lat: float, lon: float, level: int) -> str:
 
 @api_router.post("/upload/prepare")
 def prepare_upload(payload: UploadPrepareRequest):
+    JST = timezone(timedelta(hours=9))
+    now_jst = datetime.now(JST)
+
+    start_time = int(now_jst.timestamp() * 1000)
+    end_time = int(now_jst.timestamp() * 1000)
+    print(f"processed_time: {end_time-start_time}")
+    
     """予約を記録してアップロード用フォルダーを返す。"""
     geohash = pygeohash.encode(
         latitude=payload.lat,

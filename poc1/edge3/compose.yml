@@ -28,6 +28,7 @@ services:
         limits:
           cpus: "2.5"
           memory: "4G"
+    restart: always
   edge3-mysql:
     image: "mysql:8.0"
     environment:
@@ -78,11 +79,11 @@ services:
       - ./docker/minio/data:/export
     networks:
       edge3-network: {}
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: "1G"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1.0"
+    #       memory: "2G"
   edge3-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0
     volumes:
