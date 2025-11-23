@@ -12,7 +12,7 @@ services:
        MINIO_PROMETHEUS_AUTH_TYPE: "public"
     command: server /export --console-address ":9090"
     volumes:
-      - ./docker/minio/data:/export
+      - minio-bench-data:/export
   minio-prometheus:
     image: prom/prometheus:latest
     restart: unless-stopped
@@ -31,3 +31,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     env_file:
       - ./grafana/config.monitoring
+      
+volumes:
+  minio-bench-data:
+    name: minio-bench-data
