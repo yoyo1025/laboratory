@@ -7,7 +7,7 @@ export const options = {
   scenarios: {
     pointcloud_upload: {
       executor: 'constant-arrival-rate',
-      rate: 80,          // 1秒あたり80リクエスト
+      rate: 150,          // 1秒あたり80リクエスト
       timeUnit: '1s',
       duration: '5m',
       preAllocatedVUs: 10000,
