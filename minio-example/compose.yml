@@ -36,6 +36,11 @@ services:
       context: ./docker/fio
     volumes:
       - minio-bench-data:/export
+  iperf3-server:
+    image: networkstatic/iperf3
+    command: -s
+    ports:
+      - "5201:5201"
 volumes:
   minio-bench-data:
     name: minio-bench-data
