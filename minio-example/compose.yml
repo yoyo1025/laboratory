@@ -31,7 +31,11 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     env_file:
       - ./grafana/config.monitoring
-      
+  fio-bench:
+    build:
+      context: ./docker/fio
+    volumes:
+      - minio-bench-data:/export
 volumes:
   minio-bench-data:
     name: minio-bench-data
