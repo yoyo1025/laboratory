@@ -269,9 +269,9 @@ def prepare_upload(payload: UploadPrepareRequest):
     JST = timezone(timedelta(hours=9))
     now_jst = datetime.now(JST)
 
-    start_time = int(now_jst.timestamp() * 1000)
-    end_time = int(now_jst.timestamp() * 1000)
-    print(f"processed_time: {end_time-start_time}")
+    # start_time = int(now_jst.timestamp() * 1000)
+    # end_time = int(now_jst.timestamp() * 1000)
+    # print(f"processed_time: {end_time-start_time}")
     
     """予約を記録してアップロード用フォルダーを返す。"""
     geohash = pygeohash.encode(
