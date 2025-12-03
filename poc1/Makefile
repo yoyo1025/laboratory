@@ -18,7 +18,7 @@ start: start-all
 stop: stop-all
 
 # ---- all projects ----
-start-all: clean-minio
+start-all: clean-minio stop-all
 	$(COMPOSE) -p cloud  $(CLOUD_COMPOSE) up -d --build
 	$(COMPOSE) -p edge1  $(EDGE1_COMPOSE) up -d --build
 	$(COMPOSE) -p edge2  $(EDGE2_COMPOSE) up -d --build
