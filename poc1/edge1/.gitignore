@@ -2,3 +2,4 @@
 app/store/
 testdata/
 /docker/
+*.csv
