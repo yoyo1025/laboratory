@@ -100,10 +100,10 @@ count-ply2:
 	docker run --rm \
 	  -v edge2-minio-data:/data \
 	  alpine \
-	  sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$$d" ] && echo "$$d"; done | wc -l'
+	  sh -c 'cd /data/edge2-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$$d" ] && echo "$$d"; done | wc -l'
 
 count-ply3:
 	docker run --rm \
 	  -v edge3-minio-data:/data \
 	  alpine \
-	  sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$$d" ] && echo "$$d"; done | wc -l'
+	  sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$$d" ] && echo "$$d"; done | wc -l'
