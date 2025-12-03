@@ -1,19 +1,19 @@
 ```mermaid
 sequenceDiagram
-    participant クライアント
-    participant EdgeAPI as Edge API (FastAPI/uvicorn)
-    participant MinIO as MinIO(edge1)
+    participant Client
+    participant EdgeAPI as Edge API
+    participant MinIO as MinIO
     participant DB as MySQL
 
     %% アップロード予約
-    クライアント->>EdgeAPI: POST /upload/prepare<br/>(user_id, lat, lon, geohash_level)
+    Client->>EdgeAPI: POST /upload/prepare<br/>(user_id, lat, lon, geohash_level)
     EdgeAPI->>DB: INSERT upload_reservations
     DB-->>EdgeAPI: reservation_id
-    EdgeAPI-->>クライアント: bucket, object_key<br/>(tmp/{geohash}/{token}/x±lat-y±lon-lvl.ply)
+    EdgeAPI-->>Client: bucket, object_key<br/>(tmp/{geohash}/{token}/x±lat-y±lon-lvl.ply)
 
     %% 点群アップロード
-    クライアント->>MinIO: PUT tmp/{geohash}/{token}/...ply
-    MinIO-->>クライアント: 200/204
+    Client->>MinIO: PUT tmp/{geohash}/{token}/...ply
+    MinIO-->>Client: 200/204
 
     %% Webhook 通知
     MinIO->>EdgeAPI: POST /minio/webhook (Records)
