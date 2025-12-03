@@ -23,11 +23,11 @@ services:
        SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-20}"
     networks:
       edge1-network: {}
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "2.5"
-    #       memory: "4G"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.5"
+          memory: "4G"
     restart: always
   edge1-mysql:
     image: "mysql:8.0"
@@ -79,11 +79,11 @@ services:
       - edge1-minio-data:/export
     networks:
       edge1-network: {}
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "1.0"
-    #       memory: "2G"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "2G"
   edge1-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0
     volumes:
