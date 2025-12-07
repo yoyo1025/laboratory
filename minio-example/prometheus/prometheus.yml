@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 3s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 3s
+    static_configs:
+      - targets: ['minio-prometheus:9090']
+  - job_name: 'minio'
+    scrape_interval: 3s
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: ['minio-benchmark:9000']

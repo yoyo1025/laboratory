@@ -75,7 +75,7 @@ services:
       MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://cloud-api:8100/minio/webhook}"
     command: server --address ":9100" --console-address ":9101" /export
     volumes:
-      - ./docker/minio/data:/export
+      - cloud-minio-data:/export
     networks:
       cloud-network: null
     deploy:
@@ -83,16 +83,16 @@ services:
         limits:
           cpus: "0.5"
           memory: "1G"
-  cloud-mc:
-    image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
-    depends_on: [cloud-minio, cloud-api]
-    entrypoint: ["/bin/sh", "-lc"]
-    command: |
-      mc alias set local http://minio:9000 minio_root minio_password && \
-      mc anonymous set public local/local-point-cloud || true && \
-      sleep infinity
-    networks:
-      cloud-network: null
+  # cloud-mc:
+  #   image: "minio/mc:RELEASE.2025-07-21T05-28-08Z"
+  #   depends_on: [cloud-minio, cloud-api]
+  #   entrypoint: ["/bin/sh", "-lc"]
+  #   command: |
+  #     mc alias set local http://minio:9000 minio_root minio_password && \
+  #     mc anonymous set public local/local-point-cloud || true && \
+  #     sleep infinity
+  #   networks:
+  #     cloud-network: null
   cloud-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0
     container_name: cloud_mysql_exporter
@@ -165,6 +165,8 @@ services:
       cloud-network: {}
 volumes:
   cloud_mysql_data:
+  cloud-minio-data:
+    name: cloud-minio-data
 
 networks:
   cloud-network:

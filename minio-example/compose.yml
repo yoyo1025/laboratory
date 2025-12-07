@@ -12,4 +12,35 @@ services:
        MINIO_PROMETHEUS_AUTH_TYPE: "public"
     command: server /export --console-address ":9090"
     volumes:
-      - ./docker/minio/data:/export
+      - minio-bench-data:/export
+  minio-prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - 7090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  minio-grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    depends_on:
+      - minio-prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - ./grafana/config.monitoring
+  fio-bench:
+    build:
+      context: ./docker/fio
+    volumes:
+      - minio-bench-data:/export
+  iperf3-server:
+    image: networkstatic/iperf3
+    command: -s
+    ports:
+      - "5201:5201"
+volumes:
+  minio-bench-data:
+    name: minio-bench-data

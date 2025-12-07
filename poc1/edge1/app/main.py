@@ -148,25 +148,25 @@ def handle_record_sync(rec, mc: Minio, request_id: str, start_time: int):
 async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks):
     # リクエストIDを表示
     request_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-    print(f"request_{request_id}: start")
+    # print(f"request_{request_id}: start")
     # 処理開始時刻算出
-    # JST = timezone(timedelta(hours=9))
-    # now_jst = datetime.now(JST)
+    JST = timezone(timedelta(hours=9))
+    now_jst = datetime.now(JST)
 
-    # start_time = int(now_jst.timestamp() * 1000)
+    start_time = int(now_jst.timestamp() * 1000)
     # end_time = int(now_jst.timestamp() * 1000)
     # print(f"processed_time: {end_time-start_time}")
     
-    # body = {}
-    # try:
-    #     with log_duration("webhook.parse_json"):
-    #         body = await request.json()
-    # except Exception:
-    #     body = {}
+    body = {}
+    try:
+        with log_duration("webhook.parse_json"):
+            body = await request.json()
+    except Exception:
+        body = {}
 
-    # records = body.get("Records", [body]) if isinstance(body, dict) else []
-    # for rec in records:
-    #     background.add_task(handle_record_sync, rec, mc, request_id, start_time)
+    records = body.get("Records", [body]) if isinstance(body, dict) else []
+    for rec in records:
+        background.add_task(handle_record_sync, rec, mc, request_id, start_time)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -269,9 +269,9 @@ def prepare_upload(payload: UploadPrepareRequest):
     JST = timezone(timedelta(hours=9))
     now_jst = datetime.now(JST)
 
-    start_time = int(now_jst.timestamp() * 1000)
-    end_time = int(now_jst.timestamp() * 1000)
-    print(f"processed_time: {end_time-start_time}")
+    # start_time = int(now_jst.timestamp() * 1000)
+    # end_time = int(now_jst.timestamp() * 1000)
+    # print(f"processed_time: {end_time-start_time}")
     
     """予約を記録してアップロード用フォルダーを返す。"""
     geohash = pygeohash.encode(
