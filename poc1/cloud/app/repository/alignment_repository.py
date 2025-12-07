@@ -54,37 +54,23 @@ class AlignmentRepository:
         )
     
     def save_pc_metadata(self, db: Session, geohash: str, geohash_level: int, filename: str, object_key: str, size_bytes: Optional[int], content_type: Optional[str]) -> Tuple[int, int]:
-        
         with db.begin():
-            # 1-1) 既存エリア取得（FOR UPDATEで同時挿入競合を抑止）
-            area_id = db.execute(
-                text("SELECT id FROM areas WHERE geohash = :geohash FOR UPDATE"),
-                {"geohash": geohash},
-            ).scalar()
-
-            if area_id is None:
-                # 1-2) 新規作成
-                db.execute(
-                    text("""
-                        INSERT INTO areas (geohash, geohash_level)
-                        VALUES (:geohash, :lvl)
-                    """),
-                    {"geohash": geohash, "lvl": geohash_level},
-                )
-                # 直近のIDを再取得
-                area_id = db.execute(
-                    text("SELECT id FROM areas WHERE geohash = :geohash"),
-                    {"geohash": geohash},
-                ).scalar_one()
-            else:
-                # 1-3) 既存なら updated_at をタッチ（ビジネスルール次第で省略可）
-                db.execute(
-                    text("UPDATE areas SET updated_at = CURRENT_TIMESTAMP(6) WHERE id = :id"),
-                    {"id": area_id},
-                )
+            # 1) areas を1ステートメントで upsert して ID を取得（SELECT ... FOR UPDATE を避けてロック競合を緩和）
+            area_res = db.execute(
+                text("""
+                    INSERT INTO areas (geohash, geohash_level, updated_at)
+                    VALUES (:geohash, :lvl, CURRENT_TIMESTAMP(6))
+                    ON DUPLICATE KEY UPDATE
+                        geohash_level = VALUES(geohash_level),
+                        updated_at    = VALUES(updated_at),
+                        id            = LAST_INSERT_ID(id)
+                """),
+                {"geohash": geohash, "lvl": geohash_level},
+            )
+            area_id = area_res.lastrowid
 
             # 2) 履歴 upsert（重複時も LAST_INSERT_ID で既存idを取る）
-            res = db.execute(
+            upload_res = db.execute(
                 text("""
                     INSERT INTO pc_uploaded_history
                         (area_id, file_name, object_key, size_bytes, content_type)
@@ -101,13 +87,6 @@ class AlignmentRepository:
                     "content_type": content_type,
                 },
             )
-            upload_id = res.lastrowid or db.execute(
-                text("""
-                    SELECT id FROM pc_uploaded_history
-                    WHERE area_id = :area_id AND object_key = :object_key
-                    LIMIT 1
-                """),
-                {"area_id": area_id, "object_key": object_key},
-            ).scalar_one()
+            upload_id = upload_res.lastrowid
 
         return area_id, upload_id

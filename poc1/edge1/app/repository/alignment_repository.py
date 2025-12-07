@@ -57,7 +57,7 @@ class AlignmentRepository:
 
         with db.begin():
             # 1) areas を1ステートメントで upsert して ID を取得（SELECT ... FOR UPDATE を避けてロック競合を緩和）
-            res = db.execute(
+            area_res = db.execute(
                 text("""
                     INSERT INTO areas (geohash, geohash_level, updated_at)
                     VALUES (:geohash, :lvl, CURRENT_TIMESTAMP(6))
@@ -68,13 +68,10 @@ class AlignmentRepository:
                 """),
                 {"geohash": geohash, "lvl": geohash_level},
             )
-            area_id = res.lastrowid or db.execute(
-                text("SELECT id FROM areas WHERE geohash = :geohash"),
-                {"geohash": geohash},
-            ).scalar_one()
+            area_id = area_res.lastrowid
 
             # 2) 履歴 upsert（重複時も LAST_INSERT_ID で既存idを取る）
-            res = db.execute(
+            upload_res = db.execute(
                 text("""
                     INSERT INTO pc_uploaded_history
                         (area_id, file_name, object_key, size_bytes, content_type)
@@ -91,13 +88,6 @@ class AlignmentRepository:
                     "content_type": content_type,
                 },
             )
-            upload_id = res.lastrowid or db.execute(
-                text("""
-                    SELECT id FROM pc_uploaded_history
-                    WHERE area_id = :area_id AND object_key = :object_key
-                    LIMIT 1
-                """),
-                {"area_id": area_id, "object_key": object_key},
-            ).scalar_one()
+            upload_id = upload_res.lastrowid
 
         return area_id, upload_id
