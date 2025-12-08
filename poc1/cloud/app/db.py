@@ -12,7 +12,15 @@ db_name = os.getenv("DB_NAME", "sample_db")
 
 SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_pre_ping=True, future=True)
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URI,
+    pool_size=20,
+    max_overflow=40,
+    pool_timeout=30,
+    pool_recycle=3600,
+    pool_pre_ping=True,
+    future=True,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_session() -> Generator[Session, None, None]:
