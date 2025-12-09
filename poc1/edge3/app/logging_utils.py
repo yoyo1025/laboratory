@@ -3,8 +3,9 @@ import sys
 import time
 from contextlib import contextmanager
 
+SERVER_START_TS = time.perf_counter()
 
-logger = logging.getLogger("edge1.app")
+logger = logging.getLogger("edge3.app")
 logger.setLevel(logging.INFO)
 if not logger.handlers:
     handler = logging.StreamHandler(sys.stdout)
@@ -13,11 +14,17 @@ if not logger.handlers:
 logger.propagate = False
 
 
+
 @contextmanager
 def log_duration(name: str):
     start = time.perf_counter()
+    since_start = int(time.perf_counter() - SERVER_START_TS)
+    logger.info(f"{name},{since_start},1")
     try:
         yield
     finally:
         elapsed = time.perf_counter() - start
-        logger.info("%s: %.5f", name, elapsed)
+        since_start = int(time.perf_counter() - SERVER_START_TS)
+        # logger.info("%s: %.5f", name, elapsed)
+        # logger.info("elapsed_time: %d", since_start)
+        logger.info(f"{name},{since_start},-1")
