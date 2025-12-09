@@ -1,0 +1,68 @@
+tadanoyousei@TYMM4 k6 % k6 run combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 3m30s max duration (incl. graceful stop):
+              * pointcloud_upload: 60.00 iterations/s for 3m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 30s)
+
+WARN[0011] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0032] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0032] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0055] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0059] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0060] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0060] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0068] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0069] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0070] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0101] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0102] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0105] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0113] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0130] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0130] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0130] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0145] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/d230318df202ec9f/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 19405  92.396646/s
+    checks_succeeded...: 99.90% 19387 out of 19405
+    checks_failed......: 0.09%  18 out of 19405
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 9694 / ✗ 17
+    ✗ point cloud upload succeeded
+      ↳  99% — ✓ 9693 / ✗ 1
+
+    HTTP
+    http_req_duration..............: avg=4.6s  min=1.47ms med=588.75ms max=34.01s p(90)=16.38s p(95)=21.35s
+      { expected_response:true }...: avg=4.6s  min=2.53ms med=592.42ms max=34.01s p(90)=16.38s p(95)=21.37s
+    http_req_failed................: 0.09%  18 out of 19405
+    http_reqs......................: 19405  92.396646/s
+
+    EXECUTION
+    dropped_iterations.............: 988    4.704349/s
+    iteration_duration.............: avg=9.19s min=1.89ms med=6.74s    max=34.23s p(90)=22.1s  p(95)=26.46s
+    iterations.....................: 9711   46.238795/s
+    vus............................: 102    min=1           max=1034
+    vus_max........................: 1035   min=50          max=1035
+
+    NETWORK
+    data_received..................: 8.7 MB 42 kB/s
+    data_sent......................: 7.4 GB 35 MB/s
+
+
+
+
+running (3m30.0s), 0000/1035 VUs, 9711 complete and 102 interrupted iterations
+pointcloud_upload ✓ [======================================] 0102/1035 VUs  3m0s  60.00 iters/s
