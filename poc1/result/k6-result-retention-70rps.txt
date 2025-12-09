@@ -1,0 +1,160 @@
+tadanoyousei@TYMM4 k6 % k6 run combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 3m30s max duration (incl. graceful stop):
+              * pointcloud_upload: 70.03 iterations/s for 3m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 30s)
+
+WARN[0013] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0026] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0026] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0047] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0065] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0117] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0124] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0145] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0179] Insufficient VUs, reached 2000 active VUs and cannot initialize more  executor=constant-arrival-rate scenario=pointcloud_upload
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0195] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0196] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0197] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0198] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0199] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0200] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0201] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0201] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0201] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0201] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": request timeout"
+WARN[0201] Request Failed                                error="request timeout"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 18960  90.235303/s
+    checks_succeeded...: 99.41% 18850 out of 18960
+    checks_failed......: 0.58%  110 out of 18960
+
+    ✗ upload prepare succeeded
+      ↳  98% — ✓ 9425 / ✗ 110
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=7.74s  min=1.85ms med=841.35ms max=1m0s   p(90)=26.84s p(95)=35.09s
+      { expected_response:true }...: avg=7.45s  min=3.32ms med=828.67ms max=59.99s p(90)=26.46s p(95)=32.39s
+    http_req_failed................: 0.58%  110 out of 18960
+    http_reqs......................: 18960  90.235303/s
+
+    EXECUTION
+    dropped_iterations.............: 1984   9.442344/s
+    iteration_duration.............: avg=15.39s min=2.06ms med=10.41s   max=1m0s   p(90)=36.67s p(95)=55.7s 
+    iterations.....................: 9535   45.37941/s
+    vus............................: 1086   min=2            max=2000
+    vus_max........................: 2000   min=50           max=2000
+
+    NETWORK
+    data_received..................: 8.5 MB 40 kB/s
+    data_sent......................: 7.2 GB 34 MB/s
+
+
+
+
+running (3m30.1s), 0000/2000 VUs, 9535 complete and 1086 interrupted iterations
+pointcloud_upload ✓ [======================================] 1086/2000 VUs  3m0s  70.03 iters/s
