@@ -1,0 +1,54 @@
+tadanoyousei@TYMM4 k6 % k6 run combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 3m30s max duration (incl. graceful stop):
+              * pointcloud_upload: 20.00 iterations/s for 3m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 30s)
+
+WARN[0018] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0036] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0036] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0094] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 7195   39.960602/s
+    checks_succeeded...: 99.93% 7190 out of 7195
+    checks_failed......: 0.06%  5 out of 7195
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 3595 / ✗ 5
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=122.5ms  min=2.33ms med=7.63ms max=5.46s p(90)=71.54ms  p(95)=368.87ms
+      { expected_response:true }...: avg=122.57ms min=2.33ms med=7.63ms max=5.46s p(90)=71.81ms  p(95)=368.99ms
+    http_req_failed................: 0.06%  5 out of 7195
+    http_reqs......................: 7195   39.960602/s
+
+    EXECUTION
+    dropped_iterations.............: 1      0.005554/s
+    iteration_duration.............: avg=245.72ms min=7.57ms med=14.4ms max=5.76s p(90)=169.64ms p(95)=2.17s   
+    iterations.....................: 3600   19.994186/s
+    vus............................: 0      min=0         max=49
+    vus_max........................: 51     min=50        max=51
+
+    NETWORK
+    data_received..................: 3.2 MB 18 kB/s
+    data_sent......................: 2.7 GB 15 MB/s
+
+
+
+
+running (3m00.1s), 0000/0051 VUs, 3600 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0051 VUs  3m0s  20.00 iters/s
