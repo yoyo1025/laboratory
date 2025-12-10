@@ -178,7 +178,7 @@ class AligmentUsecase:
         # print("[debug] merge points:", len(self.merge_pc.points), "colors:", self.merge_pc.has_colors(), "normals:", self.merge_pc.has_normals())
         # print("[debug] merged points:", len(merged.points), "colors:", merged.has_colors(), "normals:", merged.has_normals())
         
-        print(f"request_{request_id}: end")
+        # print(f"request_{request_id}: end")
         
         # 現在時刻を取得
         JST = timezone(timedelta(hours=9))
