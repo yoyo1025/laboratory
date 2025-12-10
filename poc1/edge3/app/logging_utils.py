@@ -19,7 +19,7 @@ logger.propagate = False
 def log_duration(name: str):
     start = time.perf_counter()
     since_start = int(time.perf_counter() - SERVER_START_TS)
-    logger.info(f"{name},{since_start},1")
+    # logger.info(f"{name},{since_start},1")
     try:
         yield
     finally:
@@ -27,4 +27,4 @@ def log_duration(name: str):
         since_start = int(time.perf_counter() - SERVER_START_TS)
         # logger.info("%s: %.5f", name, elapsed)
         # logger.info("elapsed_time: %d", since_start)
-        logger.info(f"{name},{since_start},-1")
+        # logger.info(f"{name},{since_start},-1")
