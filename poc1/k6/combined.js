@@ -39,6 +39,7 @@ export const options = {
       preAllocatedVUs: 50,
       maxVUs: 2000,
       exec: 'uploadScenario',
+      gracefulStop: '5s',
     },
 
     // pointcloud_fetch: {

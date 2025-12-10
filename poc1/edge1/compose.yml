@@ -26,8 +26,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2.5"
-          memory: "4G"
+          cpus: "1.5"
+          memory: "2.5G"
     restart: always
   edge1-mysql:
     image: "mysql:8.0"
@@ -49,6 +49,11 @@ services:
       retries: 5
     networks:
       edge1-network: {}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.6"
+          memory: "1G"
   edge1-phpmyadmin:
     image: "phpmyadmin/phpmyadmin"
     environment:
@@ -82,7 +87,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: "0.8"
           memory: "2G"
   edge1-mysql-exporter:
     image: prom/mysqld-exporter:v0.18.0

@@ -19,12 +19,14 @@ logger.propagate = False
 def log_duration(name: str):
     start = time.perf_counter()
     since_start = int(time.perf_counter() - SERVER_START_TS)
-    # logger.info(f"{name},{since_start},1")
+    # name の処理を開始（滞留調査）
+    logger.info(f"retention_{name},{since_start},1")
     try:
         yield
     finally:
         elapsed = time.perf_counter() - start
         since_start = int(time.perf_counter() - SERVER_START_TS)
-        # logger.info("%s: %.5f", name, elapsed)
-        # logger.info("elapsed_time: %d", since_start)
-        # logger.info(f"{name},{since_start},-1")
+        # name の処理時間
+        logger.info("%s: %.5f", name, elapsed)
+        # name の処理を終了（滞留調査）
+        logger.info(f"retention_{name},{since_start},-1")
