@@ -28,6 +28,6 @@ def log_duration(name: str):
         elapsed = time.perf_counter() - start
         since_start = int(time.perf_counter() - SERVER_START_TS)
         # name の処理時間
-        logger.info("%s: %.5f", name, elapsed)
+        logger.info("processed_time_%s: %.5f", name, elapsed)
         # name の処理を終了（滞留調査）
         logger.info(f"retention_{name},{since_start},-1")
