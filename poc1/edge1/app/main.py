@@ -154,8 +154,6 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
     now_jst = datetime.now(JST)
 
     start_time = int(now_jst.timestamp() * 1000)
-    # end_time = int(now_jst.timestamp() * 1000)
-    # print(f"processed_time: {end_time-start_time}")
     
     body = {}
     try:
@@ -268,10 +266,6 @@ def _build_filename(lat: float, lon: float, level: int) -> str:
 def prepare_upload(payload: UploadPrepareRequest):
     JST = timezone(timedelta(hours=9))
     now_jst = datetime.now(JST)
-
-    # start_time = int(now_jst.timestamp() * 1000)
-    # end_time = int(now_jst.timestamp() * 1000)
-    # print(f"processed_time: {end_time-start_time}")
     
     """予約を記録してアップロード用フォルダーを返す。"""
     geohash = pygeohash.encode(

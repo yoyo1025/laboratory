@@ -186,6 +186,4 @@ class AligmentUsecase:
         unix_time = int(now_jst.timestamp())
         print(unix_time)
         end_time = int(now_jst.timestamp() * 1000)
-        print(f"processed_time: {end_time-start_time}")
-        # print(f"{datetime_str} MEMO: done in {time.time() - start:.2f}s")
-        print("RESULT: merged and uploaded to s3")
+        print(f"total_processed_time: {end_time-start_time}")

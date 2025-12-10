@@ -154,8 +154,6 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
     now_jst = datetime.now(JST)
 
     start_time = int(now_jst.timestamp() * 1000)
-    # end_time = int(now_jst.timestamp() * 1000)
-    # print(f"processed_time: {end_time-start_time}")
     
     body = {}
     try:
