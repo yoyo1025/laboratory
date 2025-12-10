@@ -51,19 +51,19 @@ services:
         limits:
           cpus: "0.3"
           memory: "0.5G"
-  cloud-phpmyadmin:
-    image: "phpmyadmin/phpmyadmin"
-    container_name: "cloud_phpmyadmin_poc1"
-    environment:
-      PMA_HOST: "cloud-mysql"
-      PMA_USER: "root"
-      PMA_PASSWORD: "p@assw0rd"
-    depends_on:
-      - cloud-mysql
-    ports:
-      - "8192:80"
-    networks:
-      cloud-network: null
+  # cloud-phpmyadmin:
+  #   image: "phpmyadmin/phpmyadmin"
+  #   container_name: "cloud_phpmyadmin_poc1"
+  #   environment:
+  #     PMA_HOST: "cloud-mysql"
+  #     PMA_USER: "root"
+  #     PMA_PASSWORD: "p@assw0rd"
+  #   depends_on:
+  #     - cloud-mysql
+  #   ports:
+  #     - "8192:80"
+  #   networks:
+  #     cloud-network: null
   cloud-minio:
     container_name: "cloud_minio_poc1"
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
@@ -98,76 +98,76 @@ services:
   #     sleep infinity
   #   networks:
   #     cloud-network: null
-  cloud-mysql-exporter:
-    image: prom/mysqld-exporter:v0.18.0
-    container_name: cloud_mysql_exporter
-    volumes:
-      - ./mysql/secrets/.mysql_exporter.cnf:/etc/.mysqld_exporter.cnf:ro
-    command:
-      - --config.my-cnf=/etc/.mysqld_exporter.cnf
-    depends_on:
-      - cloud-mysql
-    ports:
-      - "9204:9104"
-    networks:
-      cloud-network: null
-  cloud-prometheus:
-    image: prom/prometheus:latest
-    restart: unless-stopped
-    container_name: cloud-prometheus
-    ports:
-      - 19090:9090
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      cloud-network:
-        ipv4_address: 172.16.239.11
-  cloud-grafana:
-    image: grafana/grafana
-    container_name: cloud-grafana
-    restart: unless-stopped
-    depends_on:
-      - cloud-prometheus
-    ports:
-      - 13000:3000
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    env_file:
-      - ./grafana/config.monitoring
-    networks:
-      cloud-network:
-        ipv4_address: 172.16.239.12
-  cloud-otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    restart: unless-stopped
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ./otel-collection-config.yaml:/etc/otel-collector-config.yaml
-    ports:
-      - "4327:4317"  # OTLP gRPC receiver
-    networks:
-      cloud-network: {}
-    depends_on:
-      - cloud-tempo
-  cloud-tempo:
-    image: grafana/tempo:latest
-    restart: unless-stopped
-    command: ["-config.file=/etc/tempo.yaml"]
-    volumes:
-      - ./tempo/tempo.yaml:/etc/tempo.yaml
-    ports:
-      - "3300:3200"   # Tempo UI
-    networks:
-      cloud-network: {}
-  cloud-pyroscope:
-    image: grafana/pyroscope:latest
-    ports:
-      - "4140:4040"
-    command:
-      - "server"
-    restart: unless-stopped
-    networks:
-      cloud-network: {}
+  # cloud-mysql-exporter:
+  #   image: prom/mysqld-exporter:v0.18.0
+  #   container_name: cloud_mysql_exporter
+  #   volumes:
+  #     - ./mysql/secrets/.mysql_exporter.cnf:/etc/.mysqld_exporter.cnf:ro
+  #   command:
+  #     - --config.my-cnf=/etc/.mysqld_exporter.cnf
+  #   depends_on:
+  #     - cloud-mysql
+  #   ports:
+  #     - "9204:9104"
+  #   networks:
+  #     cloud-network: null
+  # cloud-prometheus:
+  #   image: prom/prometheus:latest
+  #   restart: unless-stopped
+  #   container_name: cloud-prometheus
+  #   ports:
+  #     - 19090:9090
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   networks:
+  #     cloud-network:
+  #       ipv4_address: 172.16.239.11
+  # cloud-grafana:
+  #   image: grafana/grafana
+  #   container_name: cloud-grafana
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - cloud-prometheus
+  #   ports:
+  #     - 13000:3000
+  #   volumes:
+  #     - ./grafana/provisioning:/etc/grafana/provisioning
+  #   env_file:
+  #     - ./grafana/config.monitoring
+  #   networks:
+  #     cloud-network:
+  #       ipv4_address: 172.16.239.12
+  # cloud-otel-collector:
+  #   image: otel/opentelemetry-collector-contrib:latest
+  #   restart: unless-stopped
+  #   command: ["--config=/etc/otel-collector-config.yaml"]
+  #   volumes:
+  #     - ./otel-collection-config.yaml:/etc/otel-collector-config.yaml
+  #   ports:
+  #     - "4327:4317"  # OTLP gRPC receiver
+  #   networks:
+  #     cloud-network: {}
+  #   depends_on:
+  #     - cloud-tempo
+  # cloud-tempo:
+  #   image: grafana/tempo:latest
+  #   restart: unless-stopped
+  #   command: ["-config.file=/etc/tempo.yaml"]
+  #   volumes:
+  #     - ./tempo/tempo.yaml:/etc/tempo.yaml
+  #   ports:
+  #     - "3300:3200"   # Tempo UI
+  #   networks:
+  #     cloud-network: {}
+  # cloud-pyroscope:
+  #   image: grafana/pyroscope:latest
+  #   ports:
+  #     - "4140:4040"
+  #   command:
+  #     - "server"
+  #   restart: unless-stopped
+  #   networks:
+  #     cloud-network: {}
 volumes:
   cloud_mysql_data:
   cloud-minio-data:
