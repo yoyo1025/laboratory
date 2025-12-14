@@ -34,7 +34,7 @@ export const options = {
     pointcloud_upload: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '0.05s',
+      timeUnit: '0.033333s',
       duration: '3m',
       preAllocatedVUs: 50,
       maxVUs: 2000,
