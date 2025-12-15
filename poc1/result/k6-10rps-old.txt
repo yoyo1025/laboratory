@@ -1,4 +1,4 @@
-tadanoyousei@TYMM4 k6 % k6 run combined.js
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
 
          /\      Grafana   /‾‾/  
     /\  /  \     |\  __   /  /   
@@ -7,7 +7,7 @@ tadanoyousei@TYMM4 k6 % k6 run combined.js
  / __________ \  |_|\_\  \_____/ 
 
      execution: local
-        script: combined.js
+        script: ./combined.js
         output: -
 
      scenarios: (100.00%) 1 scenario, 2000 max VUs, 3m5s max duration (incl. graceful stop):
@@ -17,32 +17,32 @@ tadanoyousei@TYMM4 k6 % k6 run combined.js
 
   █ TOTAL RESULTS 
 
-    checks_total.......: 3346    18.086154/s
-    checks_succeeded...: 100.00% 3346 out of 3346
-    checks_failed......: 0.00%   0 out of 3346
+    checks_total.......: 3442    19.121051/s
+    checks_succeeded...: 100.00% 3442 out of 3442
+    checks_failed......: 0.00%   0 out of 3442
 
     ✓ upload prepare succeeded
     ✓ point cloud upload succeeded
 
     HTTP
-    http_req_duration..............: avg=532.86ms min=2.35ms med=5.87ms  max=13.98s p(90)=170.14ms p(95)=4.53s 
-      { expected_response:true }...: avg=532.86ms min=2.35ms med=5.87ms  max=13.98s p(90)=170.14ms p(95)=4.53s 
-    http_req_failed................: 0.00%  0 out of 3346
-    http_reqs......................: 3346   18.086154/s
+    http_req_duration..............: avg=817.6ms min=2.45ms med=5.9ms   max=14.19s p(90)=434.97ms p(95)=8.32s 
+      { expected_response:true }...: avg=817.6ms min=2.45ms med=5.9ms   max=14.19s p(90)=434.97ms p(95)=8.32s 
+    http_req_failed................: 0.00%  0 out of 3442
+    http_reqs......................: 3442   19.121051/s
 
     EXECUTION
-    dropped_iterations.............: 69     0.372966/s
-    iteration_duration.............: avg=1.06s    min=7.92ms med=11.72ms max=14.08s p(90)=4.74s    p(95)=10.13s
-    iterations.....................: 1673   9.043077/s
-    vus............................: 59     min=0         max=116
-    vus_max........................: 119    min=50        max=119
+    dropped_iterations.............: 80     0.444417/s
+    iteration_duration.............: avg=1.63s   min=8.2ms  med=11.83ms max=14.29s p(90)=8.51s    p(95)=11.45s
+    iterations.....................: 1721   9.560525/s
+    vus............................: 0      min=0         max=126
+    vus_max........................: 130    min=50        max=130
 
     NETWORK
-    data_received..................: 1.5 MB 8.2 kB/s
-    data_sent......................: 1.3 GB 6.9 MB/s
+    data_received..................: 1.6 MB 8.6 kB/s
+    data_sent......................: 1.3 GB 7.3 MB/s
 
 
 
 
-running (3m05.0s), 0000/0119 VUs, 1673 complete and 59 interrupted iterations
-pointcloud_upload ✓ [======================================] 0059/0119 VUs  3m0s  10.00 iters/s
+running (3m00.0s), 0000/0130 VUs, 1721 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0130 VUs  3m0s  10.00 iters/s
