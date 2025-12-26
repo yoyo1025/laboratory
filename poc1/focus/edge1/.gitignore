@@ -1,0 +1,4 @@
+**/__pycache__/**
+app/store/
+testdata/
+/docker/

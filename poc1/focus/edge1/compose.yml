@@ -1,0 +1,169 @@
+services:
+  edge1-api:
+    build: .
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      edge1-mysql:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+       MINIO_ENDPOINT: "${MINIO_ENDPOINT:-edge1-minio:9000}"
+       MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY:-minio_root}"
+       MINIO_SECRET_KEY: "${MINIO_SECRET_KEY:-minio_password}"
+
+       CLOUD_MINIO_ENDPOINT: "${CLOUD_MINIO_ENDPOINT:-host.docker.internal:9100}"
+       CLOUD_MINIO_ACCESS_KEY: "${CLOUD_MINIO_ACCESS_KEY:-minio_root}"
+       CLOUD_MINIO_SECRET_KEY: "${CLOUD_MINIO_SECRET_KEY:-minio_password}"
+       CLOUD_MINIO_SECURE: "${CLOUD_MINIO_SECURE:-false}"
+       
+       SYNC_INTERVAL_SEC: "${SYNC_INTERVAL_SEC:-20}"
+    networks:
+      edge1-network: {}
+    deploy:
+      resources:
+        limits:
+          cpus: "5.0"
+          memory: "9.5GB"
+    restart: always
+  edge1-mysql:
+    image: "mysql:8.0"
+    environment:
+      MYSQL_DATABASE: "sample_db"
+      MYSQL_USER: "sample_user"
+      MYSQL_PASSWORD: "sample_password"
+      MYSQL_ROOT_PASSWORD: "p@assw0rd"
+      TZ: "Asia/Tokyo"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      edge1-network: {}
+    deploy:
+      resources:
+        limits:
+          cpus: "2.1"
+          memory: "3.5G"
+  # edge1-phpmyadmin:
+  #   image: "phpmyadmin/phpmyadmin"
+  #   environment:
+  #     PMA_HOST: "edge1-mysql"
+  #     PMA_USER: "root"
+  #     PMA_PASSWORD: "p@assw0rd"
+  #   depends_on:
+  #     - edge1-mysql
+  #   ports:
+  #     - "8082:80"
+  #   networks:
+  #     edge1-network: {}
+  edge1-minio:
+    image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
+    ports:
+      - "9000:9000" # API用
+      - "9001:9001" # コンソール画面用
+    env_file:
+      - ./.env
+    environment:
+       MINIO_ROOT_USER: "${MINIO_ROOT_USER:-minio_root}"
+       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-minio_password}"
+       MINIO_PROMETHEUS_AUTH_TYPE: "public"
+       MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENABLE_FASTAPI:-on}"
+       MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI: "${MINIO_NOTIFY_WEBHOOK_ENDPOINT_FASTAPI:-http://edge1-api:8000/minio/webhook}"
+    command: server --console-address ":9001" /export
+    volumes:
+      - edge1-minio-data:/export
+    networks:
+      edge1-network: {}
+    deploy:
+      resources:
+        limits:
+          cpus: "2.9"
+          memory: "7G"
+  # edge1-mysql-exporter:
+  #   image: prom/mysqld-exporter:v0.18.0
+  #   volumes:
+  #     - ./mysql/secrets/.mysql_exporter.cnf:/etc/.mysqld_exporter.cnf:ro
+  #   command:
+  #     - --config.my-cnf=/etc/.mysqld_exporter.cnf
+  #   depends_on:
+  #     - edge1-mysql
+  #   ports:
+  #     - "9104:9104"
+  #   networks:
+  #     edge1-network: {}
+  # edge1-prometheus:
+  #   image: prom/prometheus:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   networks:
+  #     edge1-network: {}
+  # edge1-grafana:
+  #   image: grafana/grafana
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - edge1-prometheus
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./grafana/provisioning:/etc/grafana/provisioning
+  #   env_file:
+  #     - ./grafana/config.monitoring
+  #   networks:
+  #     edge1-network: {}
+  # edge1-otel-collector:
+  #   image: otel/opentelemetry-collector-contrib:latest
+  #   restart: unless-stopped
+  #   command: ["--config=/etc/otel-collector-config.yaml"]
+  #   volumes:
+  #     - ./otel-collection-config.yaml:/etc/otel-collector-config.yaml
+  #   ports:
+  #     - "4317:4317"  # OTLP gRPC receiver
+  #   networks:
+  #     edge1-network: {}
+  #   depends_on:
+  #     - edge1-tempo
+  # edge1-tempo:
+  #   image: grafana/tempo:latest
+  #   restart: unless-stopped
+  #   command: ["-config.file=/etc/tempo.yaml"]
+  #   volumes:
+  #     - ./tempo/tempo.yaml:/etc/tempo.yaml
+  #   ports:
+  #     - "3200:3200"   # Tempo UI
+  #   networks:
+  #     edge1-network: {}
+  # edge1-pyroscope:
+  #   image: grafana/pyroscope:latest
+  #   ports:
+  #     - "4040:4040"
+  #   command:
+  #     - "server"
+  #   restart: unless-stopped
+  #   networks:
+  #     edge1-network: {}
+volumes:
+  mysql_data:
+  edge1-minio-data:
+    name: edge1-minio-data
+
+networks:
+  edge1-network:
+    name: edge1-network
+    driver: bridge
+    external: true
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24

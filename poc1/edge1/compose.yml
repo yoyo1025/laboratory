@@ -27,7 +27,7 @@ services:
       resources:
         limits:
           cpus: "1.5"
-          memory: "2.5G"
+          memory: "2.5GB"
     restart: always
   edge1-mysql:
     image: "mysql:8.0"

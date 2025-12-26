@@ -1,0 +1,50 @@
+tadanoyousei@TYMM4 k6 % k6 run combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 3m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 20.00 iterations/s for 3m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+WARN[0057] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0122] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 7200   39.997046/s
+    checks_succeeded...: 99.97% 7198 out of 7200
+    checks_failed......: 0.02%  2 out of 7200
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 3599 / ✗ 2
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=119.54ms min=99µs    med=4.7ms  max=5.71s p(90)=11.84ms p(95)=123.12ms
+      { expected_response:true }...: avg=119.57ms min=2.12ms  med=4.7ms  max=5.71s p(90)=11.85ms p(95)=123.22ms
+    http_req_failed................: 0.02%  2 out of 7200
+    http_reqs......................: 7200   39.997046/s
+
+    EXECUTION
+    iteration_duration.............: avg=239.71ms min=295.5µs med=9.22ms max=5.75s p(90)=45.44ms p(95)=2.13s   
+    iterations.....................: 3601   20.004078/s
+    vus............................: 0      min=0         max=37
+    vus_max........................: 50     min=50        max=50
+
+    NETWORK
+    data_received..................: 3.2 MB 18 kB/s
+    data_sent......................: 2.7 GB 15 MB/s
+
+
+
+
+running (3m00.0s), 0000/0050 VUs, 3601 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0050 VUs  3m0s  20.00 iters/s
