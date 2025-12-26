@@ -71,6 +71,10 @@ docker network create -d bridge edge3-network
 ```
 make start-all
 ```
+### MinIOバケット用意
+```
+make prepare-bucket-workstation
+```
 ### 停止方法
 ```
 make stop-all
