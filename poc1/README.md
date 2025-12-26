@@ -79,6 +79,10 @@ make prepare-bucket-workstation
 ```
 make stop-all
 ```
+### 構築実験開始
+```
+k6 run ./k6/combined.js
+```
 
 ### MinIO内のフォルダ構成
 - エッジ側
