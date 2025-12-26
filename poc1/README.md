@@ -1,3 +1,17 @@
+### Dockerネットワーク作成
+```
+docker network create -d bridge cloud-network
+```
+```
+docker network create -d bridge edge1-network
+```
+```
+docker network create -d bridge edge2-network
+```
+```
+docker network create -d bridge edge3-network
+```
+
 ### MinIO内のフォルダ構成
 - エッジ側
 ```
