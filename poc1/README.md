@@ -11,6 +11,14 @@ docker network create -d bridge edge2-network
 ```
 docker network create -d bridge edge3-network
 ```
+### 起動方法
+```
+make start-all
+```
+### 停止方法
+```
+make stop-all
+```
 
 ### MinIO内のフォルダ構成
 - エッジ側
