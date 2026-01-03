@@ -28,7 +28,7 @@ class StreamUsecase:
 
     def stream(self) -> Tuple[any, any, str, str, str]:
         # 1) edge (局所モデル)
-        local_key = f"{self.geohash}/latest/latest.ply"
+        local_key = f"{self.geohash}/latest/{self.geohash}.ply"
         try:
             obj, st = self._try_get(self.mc_local, self.local_bucket, local_key)
             return obj, st, "edge", self.local_bucket, local_key
