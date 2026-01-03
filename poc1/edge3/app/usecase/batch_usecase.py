@@ -1,6 +1,7 @@
 from repository.batch_repository import BatchRepository
 import os, asyncio
 from minio import Minio
+from logging_utils import logger
 
 SYNC_INTERVAL_SEC = int(os.getenv("SYNC_INTERVAL_SEC", "30"))
 CLOUD_BUCKET = "cloud-point-cloud"
@@ -12,6 +13,7 @@ class BatchUsecase:
 
   def _sync_once(self):
     geos = self.batch_repository.list_all_geohashes_from_db()
+    logger.info(f"[batch] geohashes: {geos}")
     ok = 0
     for g in geos:
       if self.batch_repository.upload_latest_for_geohash(g):
@@ -23,8 +25,9 @@ class BatchUsecase:
 
     while True:
         try:
+            logger.info("[batch] periodic sync start")
             # 同期処理はブロッキングなのでスレッドプールへ逃がす
             await asyncio.to_thread(self._sync_once)
         except Exception as e:
-            print(f"[sync] periodic sync failed: {e}")
+            logger.info(f"[sync] periodic sync failed: {e}")
         await asyncio.sleep(SYNC_INTERVAL_SEC)
