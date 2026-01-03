@@ -54,18 +54,18 @@ services:
         limits:
           cpus: "0.6"
           memory: "1G"
-  # edge1-phpmyadmin:
-  #   image: "phpmyadmin/phpmyadmin"
-  #   environment:
-  #     PMA_HOST: "edge1-mysql"
-  #     PMA_USER: "root"
-  #     PMA_PASSWORD: "p@assw0rd"
-  #   depends_on:
-  #     - edge1-mysql
-  #   ports:
-  #     - "8082:80"
-  #   networks:
-  #     edge1-network: {}
+  edge1-phpmyadmin:
+    image: "phpmyadmin/phpmyadmin"
+    environment:
+      PMA_HOST: "edge1-mysql"
+      PMA_USER: "root"
+      PMA_PASSWORD: "p@assw0rd"
+    depends_on:
+      - edge1-mysql
+    ports:
+      - "8082:80"
+    networks:
+      edge1-network: {}
   edge1-minio:
     image: "minio/minio:RELEASE.2025-07-23T15-54-02Z"
     ports:
