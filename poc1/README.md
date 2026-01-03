@@ -61,15 +61,15 @@ apt install containerd.io=1.7.28-1~ubuntu.24.04~noble
 
 ### Dockerネットワーク作成
 ```
-docker network create -d bridge cloud-network
-docker network create -d bridge edge1-network
-docker network create -d bridge edge2-network
-docker network create -d bridge edge3-network
+sudo docker network create -d bridge cloud-network
+sudo docker network create -d bridge edge1-network
+sudo docker network create -d bridge edge2-network
+sudo docker network create -d bridge edge3-network
 ```
 
 ### 起動方法
 ```
-make start-all
+sudo make start-all
 ```
 ### MinIOバケット用意
 ```
@@ -77,7 +77,11 @@ make prepare-bucket-workstation
 ```
 ### 停止方法
 ```
-make stop-all
+sudo make stop-all
+```
+### 構築実験開始
+```
+k6 run ./k6/combined.js
 ```
 
 ### MinIO内のフォルダ構成
@@ -97,7 +101,7 @@ edge-point-cloud/
 ```
 
 ```
-docker run --rm \
+sudo docker run --rm \
   -v edge1-minio-data:/data \
   alpine \
   sh -c 'cd /data/edge1-minio-data/tmp/xn1vqhzy && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
