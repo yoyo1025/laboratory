@@ -11,6 +11,9 @@ CLOUD_OBJECT_EXT = os.getenv("CLOUD_OBJECT_EXT", ".ply")
 LOCAL_BUCKET = "edge1-point-cloud"
 CLOUD_BUCKET = "cloud-point-cloud"
 VOXEL = 0.15
+GLOBAL_MODEL_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "global-model.ply")
+)
 
 class BatchRepository:
   def __init__(self, mc: Minio, mc_cloud: Minio):
@@ -18,7 +21,7 @@ class BatchRepository:
     self.mc_cloud = mc_cloud
   
   def local_latest_key(self, geohash: str) -> str:
-    return f"{geohash}/latest/latest.ply"
+    return f"{geohash}/latest/{geohash}.ply"
   
   def cloud_tmp_key(self, geohash: str) -> str:
     return f"tmp/{geohash}{CLOUD_OBJECT_EXT}"
@@ -50,6 +53,8 @@ class BatchRepository:
         db.close()
 
   def upload_latest_for_geohash(self, geohash: str):
+      # ハードコーディングを承知のうえgeohashを上書き
+      geohash="bbbbbbbb"
       # local latestが無ければスキップ
       src_key = self.local_latest_key(geohash)
       if self.stat_or_none(self.mc, LOCAL_BUCKET, src_key) is None:
@@ -109,12 +114,17 @@ class BatchRepository:
           # if not mesh_ok:
           #   mesh_tmp = None
 
-          # 加工しないので、アップロード対象はDLした元ファイル
-          dst_tmp = src_tmp
+          # 加工しないので、アップロード対象は固定の global-model
+          if not os.path.exists(GLOBAL_MODEL_PATH):
+              print(f"[sync] global model not found: {GLOBAL_MODEL_PATH}")
+              return False
+          dst_tmp = GLOBAL_MODEL_PATH
 
           # ===== アップロード =====
           self.ensure_bucket(self.mc_cloud, CLOUD_BUCKET)
 
+          # ハードコーディングを承知のうえgeohashを上書き
+          geohash="xxxxxxxx"
           dst_key = self.cloud_tmp_key(geohash)
           ct = "model/ply" if CLOUD_OBJECT_EXT.lower() == ".ply" else "application/octet-stream"
           self.mc_cloud.fput_object(CLOUD_BUCKET, dst_key, dst_tmp, content_type=ct)

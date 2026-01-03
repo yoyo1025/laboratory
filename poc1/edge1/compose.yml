@@ -3,6 +3,7 @@ services:
     build: .
     volumes:
       - ./app:/app
+      - ../data:/data
     ports:
       - "8000:8000"
     depends_on:
