@@ -65,7 +65,7 @@ clean-minio:
 	rm -rf edge3/docker/minio/data/edge3-point-cloud/xn1vqhzy/uploads
 
 prepare-bucket:
-	mc alias set cloud-minio http://localhost:9100 minio_root minio_password
+	mc alias set cloud-minio  http://localhost:9100 minio_root minio_password
 	mc alias set edge1-minio  http://localhost:9000 minio_root minio_password
 	mc alias set edge2-minio  http://localhost:9002 minio_root minio_password
 	mc alias set edge3-minio  http://localhost:9004 minio_root minio_password
@@ -80,16 +80,18 @@ prepare-bucket:
 	mc anonymous set upload edge2-minio/edge2-point-cloud/tmp
 	mc anonymous set upload edge3-minio/edge3-point-cloud/tmp
 
+	mc event add cloud-minio/cloud-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	mc event add edge1-minio/edge1-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	mc event add edge2-minio/edge2-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	mc event add edge3-minio/edge3-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 
-	mc cp ./data/latest.ply edge1-minio/edge1-point-cloud/xn1vqhzy/latest/latest.ply
-	mc cp ./data/latest.ply edge2-minio/edge2-point-cloud/xn1vqhzy/latest/latest.ply
-	mc cp ./data/latest.ply edge3-minio/edge3-point-cloud/xn1vqhzy/latest/latest.ply
+	mc cp ./data/global-model.ply cloud-minio/cloud-point-cloud/aaaaaaaa/latest/aaaaaaaa.ply
+	mc cp ./data/local-model.ply edge1-minio/edge1-point-cloud/bbbbbbbb/latest/bbbbbbbb.ply
+	mc cp ./data/local-model.ply edge2-minio/edge2-point-cloud/cccccccc/latest/cccccccc.ply
+	mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/cccccccc/latest/cccccccc.ply
 
 prepare-bucket-workstation:
-	./mc alias set cloud-minio http://localhost:9100 minio_root minio_password
+	./mc alias set cloud-minio  http://localhost:9100 minio_root minio_password
 	./mc alias set edge1-minio  http://localhost:9000 minio_root minio_password
 	./mc alias set edge2-minio  http://localhost:9002 minio_root minio_password
 	./mc alias set edge3-minio  http://localhost:9004 minio_root minio_password
@@ -104,13 +106,15 @@ prepare-bucket-workstation:
 	./mc anonymous set upload edge2-minio/edge2-point-cloud/tmp
 	./mc anonymous set upload edge3-minio/edge3-point-cloud/tmp
 
+	./mc event add cloud-minio/cloud-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	./mc event add edge1-minio/edge1-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	./mc event add edge2-minio/edge2-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	./mc event add edge3-minio/edge3-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 
-	./mc cp ./data/latest.ply edge1-minio/edge1-point-cloud/xn1vqhzy/latest/latest.ply
-	./mc cp ./data/latest.ply edge2-minio/edge2-point-cloud/xn1vqhzy/latest/latest.ply
-	./mc cp ./data/latest.ply edge3-minio/edge3-point-cloud/xn1vqhzy/latest/latest.ply
+	./mc cp ./data/global-model.ply cloud-minio/cloud-point-cloud/aaaaaaaa/latest/aaaaaaaa.ply
+	./mc cp ./data/local-model.ply edge1-minio/edge1-point-cloud/bbbbbbbb/latest/bbbbbbbb.ply
+	./mc cp ./data/local-model.ply edge2-minio/edge2-point-cloud/cccccccc/latest/cccccccc.ply
+	./mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/cccccccc/latest/cccccccc.ply
 
 count-ply: count-ply1 count-ply2 count-ply3
 
