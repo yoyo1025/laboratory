@@ -1,0 +1,66 @@
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ./combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 50.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+WARN[0035] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 5999   96.580817/s
+    checks_succeeded...: 99.98% 5998 out of 5999
+    checks_failed......: 0.01%  1 out of 5999
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 2999 / ✗ 1
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=7.16ms  min=2.22ms med=6.63ms max=160.35ms p(90)=10.62ms p(95)=13.07ms
+      { expected_response:true }...: avg=7.16ms  min=2.22ms med=6.63ms max=160.35ms p(90)=10.62ms p(95)=13.07ms
+    http_req_failed................: 0.01%  1 out of 5999
+    http_reqs......................: 5999   96.580817/s
+
+    EXECUTION
+    iteration_duration.............: avg=14.77ms min=6.48ms med=12.7ms max=180.17ms p(90)=17.82ms p(95)=21.95ms
+    iterations.....................: 3000   48.298458/s
+    vus............................: 1      min=0         max=2 
+    vus_max........................: 50     min=50        max=50
+
+    NETWORK
+    data_received..................: 2.7 MB 44 kB/s
+    data_sent......................: 2.3 GB 37 MB/s
+
+
+
+
+running (1m02.1s), 0000/0050 VUs, 3000 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0050 VUs  1m0s  50.00 iters/s
+
+tadanoyousei@TYMM4 poc1 % make count-ply     
+docker run --rm \
+          -v edge1-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+1009
+docker run --rm \
+          -v edge2-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge2-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+1000
+docker run --rm \
+          -v edge3-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+990
