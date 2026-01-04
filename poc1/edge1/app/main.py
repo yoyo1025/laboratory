@@ -5,7 +5,7 @@ from urllib.parse import unquote
 from minio import Minio
 from usecase.aligmnent_usecase import AligmentUsecase
 import open3d as o3d
-import os, asyncio, tempfile, secrets
+import os, asyncio, tempfile, secrets, threading
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone, datetime
@@ -98,18 +98,21 @@ class  PyroscopeRoute ( APIRoute ):
 api_router = APIRouter(prefix= "" , route_class=PyroscopeRoute) 
 
 @app.on_event("startup")
-async def _start_sync():
-    app.state.sync_task = asyncio.create_task(BatchUsecase(mc, mc_cloud).periodic_sync_loop())
+def _start_sync():
+    # バッチ同期を同期関数として別スレッドで起動
+    th = threading.Thread(
+        target=BatchUsecase(mc, mc_cloud).periodic_sync_loop,
+        name="batch-sync",
+        daemon=True,
+    )
+    th.start()
+    app.state.sync_thread = th
 
 @app.on_event("shutdown")
-async def _stop_sync():
-    task = getattr(app.state, "sync_task", None)
-    if task:
-        task.cancel()
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
+def _stop_sync():
+    th = getattr(app.state, "sync_thread", None)
+    if th and th.is_alive():
+        th.join(timeout=1)
         
 def handle_record_sync(rec, mc: Minio, request_id: str, start_time: int):
     with pyroscope.tag_wrapper({"endpoint": "POST:/minio/webhook", "job": "handle_record_sync"}):
@@ -164,7 +167,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     records = body.get("Records", [body]) if isinstance(body, dict) else []
     for rec in records:
-        background.add_task(handle_record_sync, rec, mc, request_id, start_time)
+        background.add_task(asyncio.to_thread, handle_record_sync, rec, mc, request_id, start_time)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
