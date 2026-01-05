@@ -50,6 +50,7 @@ class AligmentUsecase:
     def _paths(self, geohash: str, src_key: str):
         base_prefix = f"{geohash}"
         latest_key  = f"{base_prefix}/latest/latest.ply"
+        latest_key = "dddddddd/latest/dddddddd.ply"
         parts = src_key.split("/")
         token = parts[2] if len(parts) >= 3 else utc_ts()
         ts_ms = int(datetime.now(timezone.utc).timestamp() * 1000)

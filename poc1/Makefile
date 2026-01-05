@@ -88,7 +88,7 @@ prepare-bucket:
 	mc cp ./data/global-model.ply cloud-minio/cloud-point-cloud/aaaaaaaa/latest/aaaaaaaa.ply
 	mc cp ./data/local-model.ply edge1-minio/edge1-point-cloud/bbbbbbbb/latest/bbbbbbbb.ply
 	mc cp ./data/local-model.ply edge2-minio/edge2-point-cloud/cccccccc/latest/cccccccc.ply
-	mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/cccccccc/latest/cccccccc.ply
+	mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/dddddddd/latest/dddddddd.ply
 
 prepare-bucket-workstation:
 	./mc alias set cloud-minio  http://localhost:9100 minio_root minio_password
@@ -114,7 +114,7 @@ prepare-bucket-workstation:
 	./mc cp ./data/global-model.ply cloud-minio/cloud-point-cloud/aaaaaaaa/latest/aaaaaaaa.ply
 	./mc cp ./data/local-model.ply edge1-minio/edge1-point-cloud/bbbbbbbb/latest/bbbbbbbb.ply
 	./mc cp ./data/local-model.ply edge2-minio/edge2-point-cloud/cccccccc/latest/cccccccc.ply
-	./mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/cccccccc/latest/cccccccc.ply
+	./mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/dddddddd/latest/dddddddd.ply
 
 count-ply: count-ply1 count-ply2 count-ply3
 
