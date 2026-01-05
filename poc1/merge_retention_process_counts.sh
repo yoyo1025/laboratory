@@ -3,7 +3,7 @@ OUTDIR="$BASE/result"
 mkdir -p "$OUTDIR"
 
 for rps in 10 20 30 40 50 60 70 80; do
-  out="$OUTDIR/alignment_time_${rps}rps_new.csv"
+  out="$OUTDIR/retention_process_counts_${rps}rps_new.csv"
   : > "$out"  # 空で初期化
 
   for edge in 1 2 3; do
