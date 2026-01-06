@@ -2,7 +2,7 @@ BASE="/Users/tadanoyousei/laboratory/poc1"
 OUTDIR="$BASE/result"
 mkdir -p "$OUTDIR"
 
-for rps in 10 20 30 40 50 60 70 80; do
+for rps in 90 100 110 120 130 140; do
   out="$OUTDIR/alignment_times_${rps}rps_new.csv"
   : > "$out"  # 空で初期化
 
