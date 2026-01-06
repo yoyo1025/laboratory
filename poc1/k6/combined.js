@@ -3,8 +3,8 @@ import { check } from 'k6';
 
 const EDGE_TARGETS = [
   { name: 'edge1', api: 'http://localhost:8000', minio: 'http://localhost:9000' },
-  { name: 'edge2', api: 'http://localhost:8001', minio: 'http://localhost:9002' },
-  { name: 'edge3', api: 'http://localhost:8002', minio: 'http://localhost:9004' },
+  // { name: 'edge2', api: 'http://localhost:8001', minio: 'http://localhost:9002' },
+  // { name: 'edge3', api: 'http://localhost:8002', minio: 'http://localhost:9004' },
 ];
 
 // 取得対象のジオハッシュ
@@ -34,7 +34,7 @@ export const options = {
     pointcloud_upload: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '0.00714285s',
+      timeUnit: '0.01111111s',
       duration: '1m',
       preAllocatedVUs: 50,
       maxVUs: 2000,
