@@ -1,0 +1,85 @@
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ./combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 140.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+WARN[0006] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0008] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0008] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0011] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0011] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0015] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0016] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0031] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0038] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0038] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0040] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0041] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0041] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0042] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0048] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0048] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0049] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0050] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 16688  276.822294/s
+    checks_succeeded...: 99.89% 16670 out of 16688
+    checks_failed......: 0.10%  18 out of 16688
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 8335 / ✗ 18
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=153.89ms min=4.08ms med=102.72ms max=1.46s p(90)=351.56ms p(95)=429.69ms
+      { expected_response:true }...: avg=153.96ms min=4.08ms med=102.74ms max=1.46s p(90)=351.68ms p(95)=429.74ms
+    http_req_failed................: 0.10%  18 out of 16688
+    http_reqs......................: 16688  276.822294/s
+
+    EXECUTION
+    dropped_iterations.............: 48     0.796229/s
+    iteration_duration.............: avg=307.9ms  min=5.91ms med=276.09ms max=1.53s p(90)=566.62ms p(95)=666.55ms
+    iterations.....................: 8353   138.56044/s
+    vus............................: 86     min=9           max=90
+    vus_max........................: 96     min=51          max=96
+
+    NETWORK
+    data_received..................: 7.5 MB 125 kB/s
+    data_sent......................: 6.3 GB 105 MB/s
+
+
+
+
+running (1m00.3s), 0000/0096 VUs, 8353 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0096 VUs  1m0s  140.00 iters/s
+
+
+tadanoyousei@TYMM4 poc1 % make count-ply     
+docker run --rm \
+          -v edge1-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2703
+docker run --rm \
+          -v edge2-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge2-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2820
+docker run --rm \
+          -v edge3-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2812
