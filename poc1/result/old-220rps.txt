@@ -1,0 +1,54 @@
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/f76dbbaf496c1c8b/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/fbc8f548f85610df/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/c8e1010ee022588c/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/1cf4086cb84b8506/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/cf082aafa2bedfa7/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/d5fd09c37424c91e/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/23eaaa59a0817213/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/ae14ab7a9d6fbd25/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/56b32644cd9ddbeb/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/8059834420a9bf73/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/353a4ffcb95dd86d/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/c6da2a20b5bcac97/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/a28c82b195c280b9/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/2cb80c4443f3aea1/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/373c3988d9177027/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+WARN[0064] Request Failed                                error="Put \"http://localhost:9000/edge1-point-cloud/tmp/xn1vqhzy/1d37ccb6e3b3cd14/x%2B34-70011159734301-y%2B137-73557007483018-8.ply\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 15694  244.060572/s
+    checks_succeeded...: 87.05% 13663 out of 15694
+    checks_failed......: 12.94% 2031 out of 15694
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 7832 / ✗ 30
+    ✗ point cloud upload succeeded
+      ↳  74% — ✓ 5831 / ✗ 2001
+
+    HTTP
+    http_req_duration..............: avg=4.58s min=3.41ms med=281.87ms max=51.56s p(90)=20.52s p(95)=26.68s
+      { expected_response:true }...: avg=1.51s min=3.75ms med=187.9ms  max=29.29s p(90)=5s     p(95)=8.89s 
+    http_req_failed................: 12.94% 2031 out of 15694
+    http_reqs......................: 15694  244.060572/s
+
+    EXECUTION
+    dropped_iterations.............: 5339   83.02787/s
+    iteration_duration.............: avg=9.15s min=3.63ms med=2.85s    max=51.72s p(90)=27.63s p(95)=32.12s
+    iterations.....................: 7862   122.263554/s
+    vus............................: 2000   min=22            max=2000
+    vus_max........................: 2000   min=64            max=2000
+
+    NETWORK
+    data_received..................: 6.1 MB 95 kB/s
+    data_sent......................: 6.0 GB 93 MB/s
+
+
+
+
+running (1m04.3s), 0000/2000 VUs, 7862 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/2000 VUs  1m0s  220.00 iters/s
+
+エラーが多すぎて見切れてしまった。
+これ以外にもupload/prepareのEOFエラーが最初に大量発生した
