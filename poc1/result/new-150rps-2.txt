@@ -1,0 +1,52 @@
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ./combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 150.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+WARN[0049] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0050] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0053] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 17909  296.414538/s
+    checks_succeeded...: 99.98% 17906 out of 17909
+    checks_failed......: 0.01%  3 out of 17909
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 8953 / ✗ 3
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=110.44ms min=2.51ms med=83.93ms  max=844.99ms p(90)=214.21ms p(95)=287.03ms
+      { expected_response:true }...: avg=110.45ms min=2.51ms med=83.93ms  max=844.99ms p(90)=214.22ms p(95)=287.03ms
+    http_req_failed................: 0.01%  3 out of 17909
+    http_reqs......................: 17909  296.414538/s
+
+    EXECUTION
+    dropped_iterations.............: 44     0.728251/s
+    iteration_duration.............: avg=221.28ms min=32.1ms med=181.52ms max=1.08s    p(90)=399.45ms p(95)=517.42ms
+    iterations.....................: 8956   148.232096/s
+    vus............................: 56     min=9          max=88
+    vus_max........................: 94     min=57         max=94
+
+    NETWORK
+    data_received..................: 8.1 MB 134 kB/s
+    data_sent......................: 6.8 GB 113 MB/s
+
+
+
+
+running (1m00.4s), 0000/0094 VUs, 8956 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0094 VUs  1m0s  150.00 iters/s
