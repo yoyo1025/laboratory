@@ -1,0 +1,48 @@
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ./combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 150.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 17338   278.869593/s
+    checks_succeeded...: 100.00% 17338 out of 17338
+    checks_failed......: 0.00%   0 out of 17338
+
+    ✓ upload prepare succeeded
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=742.78ms min=5.94ms  med=222.08ms max=2.85s p(90)=2.23s p(95)=2.35s
+      { expected_response:true }...: avg=742.78ms min=5.94ms  med=222.08ms max=2.85s p(90)=2.23s p(95)=2.35s
+    http_req_failed................: 0.00%  0 out of 17338
+    http_reqs......................: 17338  278.869593/s
+
+    EXECUTION
+    dropped_iterations.............: 332    5.339988/s
+    iteration_duration.............: avg=1.48s    min=61.66ms med=1.49s    max=2.9s  p(90)=2.43s p(95)=2.51s
+    iterations.....................: 8669   139.434797/s
+    vus............................: 49     min=27         max=369
+    vus_max........................: 382    min=54         max=382
+
+    NETWORK
+    data_received..................: 7.8 MB 126 kB/s
+    data_sent......................: 6.6 GB 106 MB/s
+
+
+
+
+running (1m02.2s), 0000/0382 VUs, 8669 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0382 VUs  1m0s  150.00 iters/s
