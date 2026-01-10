@@ -1,0 +1,61 @@
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ./combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 130.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 15494   257.004245/s
+    checks_succeeded...: 100.00% 15494 out of 15494
+    checks_failed......: 0.00%   0 out of 15494
+
+    ✓ upload prepare succeeded
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=176.27ms min=6.13ms  med=157.94ms max=792.39ms p(90)=377.18ms p(95)=442.16ms
+      { expected_response:true }...: avg=176.27ms min=6.13ms  med=157.94ms max=792.39ms p(90)=377.18ms p(95)=442.16ms
+    http_req_failed................: 0.00%  0 out of 15494
+    http_reqs......................: 15494  257.004245/s
+
+    EXECUTION
+    dropped_iterations.............: 53     0.879129/s
+    iteration_duration.............: avg=352.91ms min=43.62ms med=329.55ms max=965.13ms p(90)=516.45ms p(95)=592.23ms
+    iterations.....................: 7747   128.502122/s
+    vus............................: 47     min=19         max=102
+    vus_max........................: 103    min=50         max=103
+
+    NETWORK
+    data_received..................: 7.0 MB 116 kB/s
+    data_sent......................: 5.9 GB 98 MB/s
+
+
+
+
+running (1m00.3s), 0000/0103 VUs, 7747 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0103 VUs  1m0s  130.00 iters/s
+
+tadanoyousei@TYMM4 poc1 % make count-ply     
+docker run --rm \
+          -v edge1-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+6093
+docker run --rm \
+          -v edge2-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge2-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+sh: cd: line 0: can't cd to /data/edge2-point-cloud/xn1vqhzy/uploads: No such file or directory
+make: *** [count-ply2] Error 2

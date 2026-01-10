@@ -89,7 +89,7 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
 @app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
-    key = f"{geohash}/{geohash}.ply"
+    key = f"{geohash}/latest/{geohash}.ply"
     obj, st = StreamUsecase(mc, key).stream()
     
     # HTTPヘッダを整形

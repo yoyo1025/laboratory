@@ -1,0 +1,143 @@
+tadanoyousei@TYMM4 k6 % k6 run combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 150.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+WARN[0006] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0009] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0010] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0010] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0010] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0011] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0011] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0012] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0012] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0012] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0015] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0015] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0015] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0016] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0016] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0016] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0017] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0017] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0017] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0017] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0017] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0018] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0018] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0019] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0020] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0020] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0021] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0021] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0021] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0021] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0022] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0022] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0022] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0025] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0026] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0028] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0029] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0030] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0031] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0033] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0033] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0034] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0035] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0036] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0037] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0037] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0037] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0037] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0039] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0040] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0041] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0043] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0043] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0044] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0046] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0046] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0050] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0050] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0051] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0051] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0052] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0055] Request Failed                                error="Post \"http://localhost:8002/upload/prepare\": EOF"
+WARN[0056] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0057] Request Failed                                error="Post \"http://localhost:8001/upload/prepare\": EOF"
+WARN[0058] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0058] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0058] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0059] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0060] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0060] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 17587  289.28401/s
+    checks_succeeded...: 99.56% 17510 out of 17587
+    checks_failed......: 0.43%  77 out of 17587
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 8755 / ✗ 77
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=367.02ms min=3.09ms med=277.48ms max=1.84s p(90)=801.21ms p(95)=972.92ms
+      { expected_response:true }...: avg=368.21ms min=7.75ms med=278.76ms max=1.84s p(90)=802.07ms p(95)=973.91ms
+    http_req_failed................: 0.43%  77 out of 17587
+    http_reqs......................: 17587  289.28401/s
+
+    EXECUTION
+    dropped_iterations.............: 169    2.779837/s
+    iteration_duration.............: avg=731.38ms min=3.35ms med=696.42ms max=2.23s p(90)=1.23s    p(95)=1.39s   
+    iterations.....................: 8832   145.275282/s
+    vus............................: 141    min=21          max=213
+    vus_max........................: 219    min=59          max=219
+
+    NETWORK
+    data_received..................: 7.9 MB 130 kB/s
+    data_sent......................: 6.7 GB 110 MB/s
+
+
+
+
+running (1m00.8s), 0000/0219 VUs, 8832 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0219 VUs  1m0s  150.00 iters/s
+
+tadanoyousei@TYMM4 poc1 % make count-ply
+docker run --rm \
+          -v edge1-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2875
+docker run --rm \
+          -v edge2-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge2-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2904
+docker run --rm \
+          -v edge3-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2976
