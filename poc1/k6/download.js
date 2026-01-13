@@ -6,7 +6,7 @@ export const options = {
     pointcloud_fetch: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '0.025s',
+      timeUnit: '0.014285s',
       duration: '1m',
       preAllocatedVUs: 50,
       maxVUs: 2000,
@@ -18,16 +18,16 @@ export const options = {
 const TARGETS = [
   // edge1
   'http://localhost:8000/pointcloud/bbbbbbbb',
-  'http://localhost:8000/pointcloud/bbbbbbbb',
-  'http://localhost:8000/pointcloud/aaaaaaaa',
-  // edge2
-  'http://localhost:8001/pointcloud/cccccccc',
-  'http://localhost:8001/pointcloud/cccccccc',
-  'http://localhost:8001/pointcloud/aaaaaaaa',
-  // edge3
-  'http://localhost:8002/pointcloud/dddddddd',
-  'http://localhost:8002/pointcloud/dddddddd',
-  'http://localhost:8002/pointcloud/aaaaaaaa',
+  // 'http://localhost:8000/pointcloud/bbbbbbbb',
+  // 'http://localhost:8000/pointcloud/aaaaaaaa',
+  // // edge2
+  // 'http://localhost:8001/pointcloud/cccccccc',
+  // 'http://localhost:8001/pointcloud/cccccccc',
+  // 'http://localhost:8001/pointcloud/aaaaaaaa',
+  // // edge3
+  // 'http://localhost:8002/pointcloud/dddddddd',
+  // 'http://localhost:8002/pointcloud/dddddddd',
+  // 'http://localhost:8002/pointcloud/aaaaaaaa',
 ];
 
 export default function downloadScenario() {
