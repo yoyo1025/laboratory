@@ -3,9 +3,15 @@
 	start-edge1 stop-edge1 \
 	start-edge2 stop-edge2 \
 	start-edge3 stop-edge3 \
-	clean-minio
+	clean-minio \
+	collect-stream-logs collect-stream-logs-all \
+	collect-stream-stats collect-stream-stats-all
 
 COMPOSE ?= docker compose
+
+LOG_DIR ?= result/deliverly
+DURATION ?= 180
+INTERVAL ?= 1
 
 CLOUD_COMPOSE  = -f cloud/compose.yml
 EDGE1_COMPOSE  = -f edge1/compose.yml
@@ -135,3 +141,21 @@ count-ply3:
 	  -v edge3-minio-data:/data \
 	  alpine \
 	  sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$$d" ] && echo "$$d"; done | wc -l'
+
+# ---- stream log/metrics collection ----
+collect-stream-logs:
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh $(EDGE) $(RPS) $(LOG_DIR)
+
+collect-stream-logs-all:
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 1 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 2 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 3 $(RPS) $(LOG_DIR)
+
+collect-stream-stats:
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh $(EDGE) $(RPS) $(DURATION) $(LOG_DIR)
+
+collect-stream-stats-all:
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 1 $(RPS) $(DURATION) $(LOG_DIR) & \
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 2 $(RPS) $(DURATION) $(LOG_DIR) & \
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 3 $(RPS) $(DURATION) $(LOG_DIR) & \
+	wait
