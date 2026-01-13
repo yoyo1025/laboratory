@@ -1,19 +1,23 @@
 OUT=container_stats.csv
-echo "timestamp,container_name,cpu_percent,mem_used,mem_limit,mem_percent" > "$OUT"
+echo "elapsed_sec,container_name,cpu_percent,mem_used,mem_limit,mem_percent" > "$OUT"
 
-prev_ts=""
+start_epoch=$(date +%s)
+
+prev_sec=""
 seen_names=""
 
 docker stats \
   --format "{{.Name}},{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}}" \
 | sed -u 's/\x1b\[[0-9;]*[a-zA-Z]//g' \
 | while IFS= read -r line; do
-    ts=$(date -Iseconds)
+    now_epoch=$(date +%s)
+    elapsed=$((now_epoch - start_epoch))
+
     name=$(echo "$line" | cut -d',' -f1)
 
-    # 秒が変わったらリセット
-    if [ "$ts" != "$prev_ts" ]; then
-      prev_ts="$ts"
+    # 1秒単位でリセット
+    if [ "$elapsed" != "$prev_sec" ]; then
+      prev_sec="$elapsed"
       seen_names=""
     fi
 
@@ -27,14 +31,13 @@ docker stats \
     # 記録済みに追加
     seen_names="${seen_names},${name}"
 
-    # 出力（表示形式はあなたのコードそのまま）
     echo "$line" \
-    | awk -F',' -v ts="$ts" '
+    | awk -F',' -v elapsed="$elapsed" '
       {
         split($3, mem, " / ");
         gsub(/%/, "", $2);
         gsub(/%/, "", $4);
         printf "%s,%s,%s,%s,%s,%s\n",
-          ts, $1, $2, mem[1], mem[2], $4
+          elapsed, $1, $2, mem[1], mem[2], $4
       }'
   done >> "$OUT"
