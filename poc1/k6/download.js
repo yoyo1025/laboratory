@@ -6,8 +6,8 @@ export const options = {
     pointcloud_fetch: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '0.0125s',
-      duration: '3m',
+      timeUnit: '0.025s',
+      duration: '1m',
       preAllocatedVUs: 50,
       maxVUs: 2000,
       gracefulStop: '5s',
@@ -37,6 +37,4 @@ export default function downloadScenario() {
   check(res, {
     'GET pointcloud succeeded or 404': (r) => [200, 404].includes(r.status),
   });
-
-  sleep(5);
 }
