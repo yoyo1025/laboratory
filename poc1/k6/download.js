@@ -6,7 +6,7 @@ export const options = {
     pointcloud_fetch: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '0.1s',
+      timeUnit: '0.0333s',
       duration: '1m',
       preAllocatedVUs: 50,
       maxVUs: 2000,
