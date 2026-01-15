@@ -44,8 +44,8 @@ if [ -n "${UNTIL:-}" ]; then
 fi
 LOG_ARGS+=("$SERVICE")
 
-PROCESSED_OUT="$OUTDIR/alignment_times_edge${EDGE}_${RPS}rps.csv"
-RETENTION_OUT="$OUTDIR/retention_process_counts_edge${EDGE}_${RPS}rps.csv"
+PROCESSED_OUT="$OUTDIR/delivery_times_edge${EDGE}_${RPS}rps.csv"
+RETENTION_OUT="$OUTDIR/retention_delivery_process_counts_edge${EDGE}_${RPS}rps.csv"
 
 : > "$PROCESSED_OUT"
 : > "$RETENTION_OUT"
