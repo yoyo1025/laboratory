@@ -46,17 +46,24 @@ LOG_ARGS+=("$SERVICE")
 
 PROCESSED_OUT="$OUTDIR/delivery_times_edge${EDGE}_${RPS}rps_distribute.csv"
 RETENTION_OUT="$OUTDIR/retention_delivery_process_counts_edge${EDGE}_${RPS}rps_distribute.csv"
+ENDPOINT_OUT="$OUTDIR/endpoint_times_edge${EDGE}_${RPS}rps_distribute.csv"
 
 : > "$PROCESSED_OUT"
 : > "$RETENTION_OUT"
+: > "$ENDPOINT_OUT"
 
 "${LOG_ARGS[@]}" | awk -F': ' \
   -v processed_out="$PROCESSED_OUT" \
   -v retention_out="$RETENTION_OUT" \
+  -v endpoint_out="$ENDPOINT_OUT" \
   '
   /^processed_time_stream\./ {
     key=$1
     sub(/^processed_time_stream\./,"",key)
+    if (key == "endpoint_ms") {
+      print key "," $2 >> endpoint_out
+      next
+    }
     print key "," $2 >> processed_out
     next
   }
@@ -68,3 +75,4 @@ RETENTION_OUT="$OUTDIR/retention_delivery_process_counts_edge${EDGE}_${RPS}rps_d
 
 echo "created: $PROCESSED_OUT"
 echo "created: $RETENTION_OUT"
+echo "created: $ENDPOINT_OUT"

@@ -5,7 +5,7 @@ from urllib.parse import unquote
 from minio import Minio
 from usecase.aligmnent_usecase import AligmentUsecase
 import open3d as o3d
-import os, asyncio, tempfile, secrets, threading
+import os, asyncio, tempfile, secrets, threading, time
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone, datetime
@@ -179,8 +179,19 @@ def _log_stream_iter(body_iter, name: str):
                 yield chunk
     return _generator()
 
+def _log_stream_total(body_iter, name: str, start_ts: float):
+    def _generator():
+        try:
+            for chunk in body_iter:
+                yield chunk
+        finally:
+            elapsed_ms = (time.perf_counter() - start_ts) * 1000.0
+            logger.info("processed_time_%s: %.3f", name, elapsed_ms)
+    return _generator()
+
 @api_router.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
+    request_start = time.perf_counter()
     # ユースケース：まずエッジMinIOを探し、無ければクラウドAPI(HTTP)へフォールバック
     # obj: 本体(ファイルライク/HTTPストリーム), st: メタ情報(MinIO Stat or HTTPヘッダdict)
     # source/bucket/key: デバッグ・トレース用メタ
@@ -234,6 +245,7 @@ def get_city_model(geohash: str):
             raise HTTPException(status_code=502, detail="unsupported stream body object")
 
     body_iter = _log_stream_iter(body_iter, f"stream.body[{source}]")
+    body_iter = _log_stream_total(body_iter, "stream.endpoint_ms", request_start)
 
     # --- StreamingResponse で逐次返却。送信完了後に close（あれば）を実行 ---
     return StreamingResponse(
