@@ -1,12 +1,15 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
+const RPS = 90;
+const TIME_UNIT = `${1 / RPS}s`;
+
 export const options = {
   scenarios: {
     pointcloud_fetch: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '0.014285s',
+      timeUnit: TIME_UNIT,
       duration: '1m',
       preAllocatedVUs: 50,
       maxVUs: 2000,
