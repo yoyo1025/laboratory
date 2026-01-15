@@ -19,15 +19,29 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# ===== ミリ秒時刻取得（mac / Linux 両対応）=====
+now_ms() {
+  if command -v gdate >/dev/null 2>&1; then
+    # coreutils が入っている場合
+    gdate +%s%3N
+  else
+    # macOS 標準
+    python3 - <<'PY'
+import time
+print(int(time.time() * 1000))
+PY
+  fi
+}
+
 # docker stats を FIFO に流す
 docker stats \
   --format "{{.Name}},{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}}" \
   > "$tmp_fifo" &
 stats_pid=$!
 
-# docker stats 開始から60秒後に止める（開始時刻は後で決める）
+# docker stats 開始から exp_duration 秒後に止める
 (
-  while [ -z "${start_epoch:-}" ]; do
+  while [ -z "${start_ms:-}" ]; do
     sleep 0.01
   done
   sleep "$exp_duration"
@@ -36,27 +50,34 @@ stats_pid=$!
 
 prev_sec=""
 seen_names=""
-start_epoch=""
+start_ms=""
 
 sed -u 's/\x1b\[[0-9;]*[a-zA-Z]//g' < "$tmp_fifo" \
 | while IFS= read -r line; do
 
-    # ★ 最初の出力が来た瞬間を 0 秒にする
-    if [ -z "$start_epoch" ]; then
-      start_epoch=$(date +%s)
+    # 最初の出力が来た瞬間を 0 秒にする
+    if [ -z "$start_ms" ]; then
+      start_ms="$(now_ms)"
     fi
 
-    now_epoch=$(date +%s)
-    elapsed=$((now_epoch - start_epoch))
+    now="$(now_ms)"
+    elapsed_ms=$((now - start_ms))
 
-    if [ "$elapsed" -ge "$exp_duration" ]; then
+    # 内部制御は秒単位
+    elapsed_sec_int=$((elapsed_ms / 1000))
+
+    if [ "$elapsed_sec_int" -ge "$exp_duration" ]; then
       break
     fi
 
+    # 表示用（例: 1.234）
+    elapsed_disp=$(awk -v ms="$elapsed_ms" 'BEGIN { printf "%.3f", ms/1000 }')
+
     name=$(echo "$line" | cut -d',' -f1)
 
-    if [ "$elapsed" != "$prev_sec" ]; then
-      prev_sec="$elapsed"
+    # 各秒・各コンテナ1回だけ出す
+    if [ "$elapsed_sec_int" != "$prev_sec" ]; then
+      prev_sec="$elapsed_sec_int"
       seen_names=""
     fi
 
@@ -66,7 +87,7 @@ sed -u 's/\x1b\[[0-9;]*[a-zA-Z]//g' < "$tmp_fifo" \
     seen_names="${seen_names},${name}"
 
     echo "$line" \
-    | awk -F',' -v elapsed="$elapsed" '
+    | awk -F',' -v elapsed="$elapsed_disp" '
       {
         split($3, mem, " / ");
         gsub(/%/, "", $2);
