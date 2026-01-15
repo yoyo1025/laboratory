@@ -5,7 +5,8 @@
 	start-edge3 stop-edge3 \
 	clean-minio \
 	collect-stream-logs collect-stream-logs-all \
-	collect-stream-stats collect-stream-stats-all
+	collect-stream-stats collect-stream-stats-all \
+	collect-stats
 
 COMPOSE ?= docker compose
 
@@ -159,3 +160,10 @@ collect-stream-stats-all:
 	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 2 $(RPS) $(DURATION) $(LOG_DIR) & \
 	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 3 $(RPS) $(DURATION) $(LOG_DIR) & \
 	wait
+
+collect-stats:
+	@if [ -z "$(RPS)" ]; then \
+		echo "usage: make collect-stats RPS=50" >&2; \
+		exit 1; \
+	fi
+	./scripts/collect_stats.sh $(RPS)

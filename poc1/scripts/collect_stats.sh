@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUT="container_stats.csv"
+RPS="${1:-}"
 exp_duration=60
+
+if [ -z "$RPS" ]; then
+  echo "usage: $0 RPS" >&2
+  exit 1
+fi
+
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+OUTDIR="$BASE_DIR/result/delivery"
+mkdir -p "$OUTDIR"
+
+OUT="$OUTDIR/container_stats_${RPS}rps_distribute.csv"
 
 echo "elapsed_sec,container_name,cpu_percent,mem_used,mem_limit,mem_percent" > "$OUT"
 

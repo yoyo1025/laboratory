@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 COPY ./app ./
 
 # FastAPI は 8000 ポートで起動するように変更
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
