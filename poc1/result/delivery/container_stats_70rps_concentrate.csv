@@ -1,0 +1,241 @@
+elapsed_sec,container_name,cpu_percent,mem_used,mem_limit,mem_percent
+0.086,edge1-edge1-api-1,0.45,1.018GiB,9.5GiB,10.72
+0.175,edge1-edge1-minio-1,0.03,243.6MiB,7GiB,3.40
+0.265,edge1-edge1-mysql-1,0.52,378.8MiB,3.5GiB,10.57
+0.612, ,,,,
+1.061,edge1-edge1-minio-1,0.03,243.6MiB,7GiB,3.40 
+1.150,edge1-edge1-mysql-1,0.52,378.8MiB,3.5GiB,10.57 
+1.239, ,,,,
+1.328,edge1-edge1-api-1,75.75,1.03GiB,9.5GiB,10.84
+2.040,edge1-edge1-minio-1,8.55,304.1MiB,7GiB,4.24
+2.132,edge1-edge1-mysql-1,0.44,378.8MiB,3.5GiB,10.57
+2.222,edge1-edge1-api-1,75.75,1.03GiB,9.5GiB,10.84 
+2.481, ,,,,
+3.003,edge1-edge1-mysql-1,0.37,378.8MiB,3.5GiB,10.57 
+3.095, ,,,,
+3.184,edge1-edge1-api-1,72.01,1.036GiB,9.5GiB,10.90
+3.272,edge1-edge1-minio-1,11.58,333MiB,7GiB,4.65
+4.066,edge1-edge1-api-1,68.12,1.037GiB,9.5GiB,10.92 
+4.163,edge1-edge1-minio-1,8.46,333.5MiB,7GiB,4.65 
+4.254,edge1-edge1-mysql-1,1.12,378.8MiB,3.5GiB,10.57 
+4.342, ,,,,
+5.070,edge1-edge1-api-1,68.76,1.04GiB,9.5GiB,10.95
+5.160,edge1-edge1-minio-1,11.51,353.5MiB,7GiB,4.93
+5.245,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57
+5.601, ,,,,
+6.064,edge1-edge1-minio-1,11.51,353.5MiB,7GiB,4.93 
+6.154,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57 
+6.244, ,,,,
+6.331,edge1-edge1-api-1,72.89,1.046GiB,9.5GiB,11.01
+7.089,edge1-edge1-minio-1,8.30,353.1MiB,7GiB,4.93
+7.184,edge1-edge1-mysql-1,0.52,378.8MiB,3.5GiB,10.57
+7.272,edge1-edge1-api-1,72.89,1.046GiB,9.5GiB,11.01 
+7.531, ,,,,
+8.063,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57 
+8.152, ,,,,
+8.237,edge1-edge1-api-1,71.31,1.047GiB,9.5GiB,11.02
+8.322,edge1-edge1-minio-1,8.58,353.5MiB,7GiB,4.93
+9.049,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57
+9.139,edge1-edge1-api-1,70.76,1.047GiB,9.5GiB,11.02 
+9.229,edge1-edge1-minio-1,11.63,353.7MiB,7GiB,4.93 
+9.399, ,,,,
+10.014, ,,,,
+10.100,edge1-edge1-api-1,76.55,1.051GiB,9.5GiB,11.06
+10.190,edge1-edge1-minio-1,8.82,354MiB,7GiB,4.94
+10.280,edge1-edge1-mysql-1,1.24,378.8MiB,3.5GiB,10.57
+11.074,edge1-edge1-minio-1,8.82,354MiB,7GiB,4.94 
+11.161,edge1-edge1-mysql-1,1.24,378.8MiB,3.5GiB,10.57 
+11.248, ,,,,
+11.336,edge1-edge1-api-1,69.94,1.051GiB,9.5GiB,11.06
+12.047,edge1-edge1-minio-1,11.49,353.8MiB,7GiB,4.94
+12.144,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+12.237,edge1-edge1-api-1,69.94,1.051GiB,9.5GiB,11.06 
+12.503, ,,,,
+13.037,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57 
+13.123, ,,,,
+13.208,edge1-edge1-api-1,69.50,1.049GiB,9.5GiB,11.04
+13.294,edge1-edge1-minio-1,8.45,353.8MiB,7GiB,4.94
+14.084,edge1-edge1-api-1,69.23,1.049GiB,9.5GiB,11.05 
+14.172,edge1-edge1-minio-1,8.26,373.9MiB,7GiB,5.22 
+14.268,edge1-edge1-mysql-1,0.42,378.8MiB,3.5GiB,10.57 
+14.356, ,,,,
+15.016, ,,,,
+15.148,edge1-edge1-api-1,68.25,1.049GiB,9.5GiB,11.04
+15.235,edge1-edge1-minio-1,12.36,408.2MiB,7GiB,5.70
+15.325,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+16.046,edge1-edge1-api-1,68.25,1.049GiB,9.5GiB,11.04 
+16.136,edge1-edge1-minio-1,12.36,408.2MiB,7GiB,5.70 
+16.222,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57 
+16.313, ,,,,
+17.040,edge1-edge1-api-1,67.01,1.05GiB,9.5GiB,11.05
+17.148,edge1-edge1-minio-1,8.30,408.2MiB,7GiB,5.70
+17.241,edge1-edge1-mysql-1,1.21,378.8MiB,3.5GiB,10.57
+17.596, ,,,,
+18.041,edge1-edge1-minio-1,8.40,408.4MiB,7GiB,5.70 
+18.128,edge1-edge1-mysql-1,0.37,378.8MiB,3.5GiB,10.57 
+18.222, ,,,,
+18.306,edge1-edge1-api-1,67.52,1.049GiB,9.5GiB,11.04
+19.008,edge1-edge1-minio-1,11.83,408.3MiB,7GiB,5.70
+19.096,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57
+19.186,edge1-edge1-api-1,73.01,1.05GiB,9.5GiB,11.06 
+19.455, ,,,,
+20.079, ,,,,
+20.170,edge1-edge1-api-1,91.44,1.051GiB,9.5GiB,11.07
+20.257,edge1-edge1-minio-1,9.57,408.4MiB,7GiB,5.70
+20.346,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+21.003,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+21.097,edge1-edge1-api-1,91.44,1.051GiB,9.5GiB,11.07 
+21.185,edge1-edge1-minio-1,9.57,408.4MiB,7GiB,5.70 
+21.360, ,,,,
+22.058,edge1-edge1-api-1,69.11,1.051GiB,9.5GiB,11.07
+22.145,edge1-edge1-minio-1,8.50,408.4MiB,7GiB,5.70
+22.242,edge1-edge1-mysql-1,0.43,378.8MiB,3.5GiB,10.57
+22.598, ,,,,
+23.036,edge1-edge1-minio-1,11.75,409MiB,7GiB,5.71 
+23.123,edge1-edge1-mysql-1,1.35,378.9MiB,3.5GiB,10.57 
+23.214, ,,,,
+23.305,edge1-edge1-api-1,77.72,1.054GiB,9.5GiB,11.10
+24.003,edge1-edge1-minio-1,8.36,409.1MiB,7GiB,5.71
+24.095,edge1-edge1-mysql-1,0.41,378.8MiB,3.5GiB,10.57
+24.184,edge1-edge1-api-1,69.10,1.054GiB,9.5GiB,11.10 
+24.461, ,,,,
+25.110, ,,,,
+25.210,edge1-edge1-api-1,66.64,1.055GiB,9.5GiB,11.10
+25.297,edge1-edge1-minio-1,8.04,408.8MiB,7GiB,5.70
+25.389,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57
+26.037,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57
+26.124,edge1-edge1-api-1,66.64,1.055GiB,9.5GiB,11.10 
+26.211,edge1-edge1-minio-1,8.04,408.8MiB,7GiB,5.70 
+26.388, ,,,,
+27.012, ,,,,
+27.153,edge1-edge1-api-1,70.31,1.052GiB,9.5GiB,11.08
+27.246,edge1-edge1-minio-1,8.08,408.5MiB,7GiB,5.70
+27.342,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57
+28.051,edge1-edge1-api-1,69.84,1.052GiB,9.5GiB,11.08 
+28.138,edge1-edge1-minio-1,11.20,408.8MiB,7GiB,5.70 
+28.226,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57 
+28.320, ,,,,
+29.022,edge1-edge1-api-1,72.82,1.05GiB,9.5GiB,11.05
+29.111,edge1-edge1-minio-1,8.50,408.6MiB,7GiB,5.70
+29.207,edge1-edge1-mysql-1,1.25,378.8MiB,3.5GiB,10.57
+29.561, ,,,,
+30.091,edge1-edge1-mysql-1,1.25,378.8MiB,3.5GiB,10.57 
+30.177, ,,,,
+30.265,edge1-edge1-api-1,68.93,1.051GiB,9.5GiB,11.07
+30.354,edge1-edge1-minio-1,8.07,408.7MiB,7GiB,5.70
+31.050,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57
+31.141,edge1-edge1-api-1,68.93,1.051GiB,9.5GiB,11.07 
+31.229,edge1-edge1-minio-1,8.07,408.7MiB,7GiB,5.70 
+31.407, ,,,,
+32.020, ,,,,
+32.108,edge1-edge1-api-1,68.28,1.05GiB,9.5GiB,11.06
+32.205,edge1-edge1-minio-1,11.42,408.6MiB,7GiB,5.70
+32.332,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+33.027,edge1-edge1-api-1,78.45,1.051GiB,9.5GiB,11.07 
+33.121,edge1-edge1-minio-1,8.56,408.6MiB,7GiB,5.70 
+33.208,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57 
+33.295, ,,,,
+34.084,edge1-edge1-minio-1,8.04,408.6MiB,7GiB,5.70
+34.179,edge1-edge1-mysql-1,0.36,378.8MiB,3.5GiB,10.57
+34.270,edge1-edge1-api-1,67.52,1.051GiB,9.5GiB,11.07 
+34.532, ,,,,
+35.092,edge1-edge1-mysql-1,0.36,378.8MiB,3.5GiB,10.57 
+35.186, ,,,,
+35.289,edge1-edge1-api-1,77.90,1.054GiB,9.5GiB,11.09
+35.381,edge1-edge1-minio-1,11.58,408.9MiB,7GiB,5.70
+36.023,edge1-edge1-minio-1,11.58,408.9MiB,7GiB,5.70
+36.107,edge1-edge1-mysql-1,1.21,379MiB,3.5GiB,10.57
+36.198,edge1-edge1-api-1,77.90,1.054GiB,9.5GiB,11.09 
+36.465, ,,,,
+37.085, ,,,,
+37.213,edge1-edge1-api-1,70.01,1.053GiB,9.5GiB,11.09
+37.305,edge1-edge1-minio-1,8.14,408.7MiB,7GiB,5.70
+37.399,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+38.021,edge1-edge1-mysql-1,0.35,378.8MiB,3.5GiB,10.57
+38.108,edge1-edge1-api-1,78.31,1.05GiB,9.5GiB,11.05 
+38.195,edge1-edge1-minio-1,8.21,409.1MiB,7GiB,5.71 
+38.381, ,,,,
+39.084,edge1-edge1-api-1,78.12,1.052GiB,9.5GiB,11.07
+39.174,edge1-edge1-minio-1,12.57,409.1MiB,7GiB,5.71
+39.266,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57
+39.616, ,,,,
+40.056,edge1-edge1-minio-1,12.57,409.1MiB,7GiB,5.71 
+40.148,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57 
+40.243, ,,,,
+40.334,edge1-edge1-api-1,66.79,1.052GiB,9.5GiB,11.07
+41.058,edge1-edge1-minio-1,8.25,409.4MiB,7GiB,5.71
+41.151,edge1-edge1-mysql-1,0.36,378.8MiB,3.5GiB,10.57
+41.245,edge1-edge1-api-1,66.79,1.052GiB,9.5GiB,11.07 
+41.512, ,,,,
+42.042,edge1-edge1-mysql-1,1.15,378.8MiB,3.5GiB,10.57 
+42.133, ,,,,
+42.221,edge1-edge1-api-1,74.31,1.052GiB,9.5GiB,11.07
+42.310,edge1-edge1-minio-1,8.46,408.7MiB,7GiB,5.70
+43.026,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+43.117,edge1-edge1-api-1,68.41,1.052GiB,9.5GiB,11.07 
+43.204,edge1-edge1-minio-1,8.19,408.7MiB,7GiB,5.70 
+43.375, ,,,,
+44.023, ,,,,
+44.113,edge1-edge1-api-1,68.50,1.051GiB,9.5GiB,11.07
+44.204,edge1-edge1-minio-1,11.69,408.9MiB,7GiB,5.71
+44.298,edge1-edge1-mysql-1,0.37,378.8MiB,3.5GiB,10.57
+45.006,edge1-edge1-api-1,68.50,1.051GiB,9.5GiB,11.07 
+45.119,edge1-edge1-minio-1,11.69,408.9MiB,7GiB,5.71 
+45.209,edge1-edge1-mysql-1,0.37,378.8MiB,3.5GiB,10.57 
+45.350, ,,,,
+46.001, ,,,,
+46.091,edge1-edge1-api-1,79.39,1.052GiB,9.5GiB,11.07
+46.266,edge1-edge1-minio-1,9.04,408.7MiB,7GiB,5.70
+46.355,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57
+47.070,edge1-edge1-api-1,73.73,1.052GiB,9.5GiB,11.07 
+47.205,edge1-edge1-minio-1,8.28,408.7MiB,7GiB,5.70 
+47.294,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57 
+47.387, ,,,,
+48.008, ,,,,
+48.096,edge1-edge1-api-1,77.87,1.055GiB,9.5GiB,11.11
+48.183,edge1-edge1-minio-1,12.32,411MiB,7GiB,5.73
+48.273,edge1-edge1-mysql-1,1.13,378.9MiB,3.5GiB,10.57
+49.063,edge1-edge1-api-1,77.87,1.055GiB,9.5GiB,11.11 
+49.149,edge1-edge1-minio-1,12.32,411MiB,7GiB,5.73 
+49.235,edge1-edge1-mysql-1,1.13,378.9MiB,3.5GiB,10.57 
+49.322, ,,,,
+50.038,edge1-edge1-api-1,69.68,1.057GiB,9.5GiB,11.12
+50.129,edge1-edge1-minio-1,8.35,410.9MiB,7GiB,5.73
+50.217,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57
+50.567, ,,,,
+51.018,edge1-edge1-minio-1,8.20,410.8MiB,7GiB,5.73 
+51.114,edge1-edge1-mysql-1,0.38,378.8MiB,3.5GiB,10.57 
+51.203, ,,,,
+51.292,edge1-edge1-api-1,67.56,1.056GiB,9.5GiB,11.12
+52.085,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57
+52.183,edge1-edge1-api-1,67.79,1.056GiB,9.5GiB,11.12 
+52.270,edge1-edge1-minio-1,11.22,411MiB,7GiB,5.73 
+52.449, ,,,,
+53.077, ,,,,
+53.169,edge1-edge1-api-1,68.63,1.053GiB,9.5GiB,11.09
+53.261,edge1-edge1-minio-1,8.02,410.8MiB,7GiB,5.73
+53.354,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57
+54.069,edge1-edge1-api-1,68.63,1.053GiB,9.5GiB,11.09 
+54.191,edge1-edge1-minio-1,8.02,410.8MiB,7GiB,5.73 
+54.287,edge1-edge1-mysql-1,0.39,378.8MiB,3.5GiB,10.57 
+54.378, ,,,,
+55.106,edge1-edge1-api-1,71.18,1.053GiB,9.5GiB,11.09
+55.197,edge1-edge1-minio-1,8.12,410.9MiB,7GiB,5.73
+55.300,edge1-edge1-mysql-1,1.19,378.9MiB,3.5GiB,10.57
+55.660, ,,,,
+56.029,edge1-edge1-api-1,74.27,1.052GiB,9.5GiB,11.07 
+56.117,edge1-edge1-minio-1,11.52,410.8MiB,7GiB,5.73 
+56.205,edge1-edge1-mysql-1,0.36,378.8MiB,3.5GiB,10.57 
+56.295, ,,,,
+57.019,edge1-edge1-api-1,74.79,1.052GiB,9.5GiB,11.07
+57.112,edge1-edge1-minio-1,8.89,410.8MiB,7GiB,5.73
+57.254,edge1-edge1-mysql-1,0.56,378.8MiB,3.5GiB,10.57
+57.608, ,,,,
+58.048,edge1-edge1-minio-1,8.89,410.8MiB,7GiB,5.73 
+58.145,edge1-edge1-mysql-1,0.56,378.8MiB,3.5GiB,10.57 
+58.232, ,,,,
+58.323,edge1-edge1-api-1,78.78,1.053GiB,9.5GiB,11.08
+59.025,edge1-edge1-minio-1,8.88,411MiB,7GiB,5.73
+59.101,edge1-edge1-mysql-1,0.40,378.8MiB,3.5GiB,10.57
+59.177,edge1-edge1-api-1,78.78,1.053GiB,9.5GiB,11.08 
+59.400, ,,,,
