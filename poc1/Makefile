@@ -3,9 +3,16 @@
 	start-edge1 stop-edge1 \
 	start-edge2 stop-edge2 \
 	start-edge3 stop-edge3 \
-	clean-minio
+	clean-minio \
+	collect-stream-logs collect-stream-logs-all \
+	collect-stream-stats collect-stream-stats-all \
+	collect-stats
 
 COMPOSE ?= docker compose
+
+LOG_DIR ?= result/deliverly
+DURATION ?= 180
+INTERVAL ?= 1
 
 CLOUD_COMPOSE  = -f cloud/compose.yml
 EDGE1_COMPOSE  = -f edge1/compose.yml
@@ -65,7 +72,7 @@ clean-minio:
 	rm -rf edge3/docker/minio/data/edge3-point-cloud/xn1vqhzy/uploads
 
 prepare-bucket:
-	mc alias set cloud-minio http://localhost:9100 minio_root minio_password
+	mc alias set cloud-minio  http://localhost:9100 minio_root minio_password
 	mc alias set edge1-minio  http://localhost:9000 minio_root minio_password
 	mc alias set edge2-minio  http://localhost:9002 minio_root minio_password
 	mc alias set edge3-minio  http://localhost:9004 minio_root minio_password
@@ -80,16 +87,18 @@ prepare-bucket:
 	mc anonymous set upload edge2-minio/edge2-point-cloud/tmp
 	mc anonymous set upload edge3-minio/edge3-point-cloud/tmp
 
+	mc event add cloud-minio/cloud-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	mc event add edge1-minio/edge1-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	mc event add edge2-minio/edge2-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	mc event add edge3-minio/edge3-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 
-	mc cp ./data/latest.ply edge1-minio/edge1-point-cloud/xn1vqhzy/latest/latest.ply
-	mc cp ./data/latest.ply edge2-minio/edge2-point-cloud/xn1vqhzy/latest/latest.ply
-	mc cp ./data/latest.ply edge3-minio/edge3-point-cloud/xn1vqhzy/latest/latest.ply
+	mc cp ./data/global-model.ply cloud-minio/cloud-point-cloud/aaaaaaaa/latest/aaaaaaaa.ply
+	mc cp ./data/local-model.ply edge1-minio/edge1-point-cloud/bbbbbbbb/latest/bbbbbbbb.ply
+	mc cp ./data/local-model.ply edge2-minio/edge2-point-cloud/cccccccc/latest/cccccccc.ply
+	mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/dddddddd/latest/dddddddd.ply
 
 prepare-bucket-workstation:
-	./mc alias set cloud-minio http://localhost:9100 minio_root minio_password
+	./mc alias set cloud-minio  http://localhost:9100 minio_root minio_password
 	./mc alias set edge1-minio  http://localhost:9000 minio_root minio_password
 	./mc alias set edge2-minio  http://localhost:9002 minio_root minio_password
 	./mc alias set edge3-minio  http://localhost:9004 minio_root minio_password
@@ -104,13 +113,15 @@ prepare-bucket-workstation:
 	./mc anonymous set upload edge2-minio/edge2-point-cloud/tmp
 	./mc anonymous set upload edge3-minio/edge3-point-cloud/tmp
 
+	./mc event add cloud-minio/cloud-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	./mc event add edge1-minio/edge1-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	./mc event add edge2-minio/edge2-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 	./mc event add edge3-minio/edge3-point-cloud arn:minio:sqs::FASTAPI:webhook --event put --prefix "tmp/" --suffix ".ply"
 
-	./mc cp ./data/latest.ply edge1-minio/edge1-point-cloud/xn1vqhzy/latest/latest.ply
-	./mc cp ./data/latest.ply edge2-minio/edge2-point-cloud/xn1vqhzy/latest/latest.ply
-	./mc cp ./data/latest.ply edge3-minio/edge3-point-cloud/xn1vqhzy/latest/latest.ply
+	./mc cp ./data/global-model.ply cloud-minio/cloud-point-cloud/aaaaaaaa/latest/aaaaaaaa.ply
+	./mc cp ./data/local-model.ply edge1-minio/edge1-point-cloud/bbbbbbbb/latest/bbbbbbbb.ply
+	./mc cp ./data/local-model.ply edge2-minio/edge2-point-cloud/cccccccc/latest/cccccccc.ply
+	./mc cp ./data/local-model.ply edge3-minio/edge3-point-cloud/dddddddd/latest/dddddddd.ply
 
 count-ply: count-ply1 count-ply2 count-ply3
 
@@ -131,3 +142,28 @@ count-ply3:
 	  -v edge3-minio-data:/data \
 	  alpine \
 	  sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$$d" ] && echo "$$d"; done | wc -l'
+
+# ---- stream log/metrics collection ----
+collect-stream-logs:
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh $(EDGE) $(RPS) $(LOG_DIR)
+
+collect-stream-logs-all:
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 1 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 2 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 3 $(RPS) $(LOG_DIR)
+
+collect-stream-stats:
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh $(EDGE) $(RPS) $(DURATION) $(LOG_DIR)
+
+collect-stream-stats-all:
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 1 $(RPS) $(DURATION) $(LOG_DIR) & \
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 2 $(RPS) $(DURATION) $(LOG_DIR) & \
+	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh 3 $(RPS) $(DURATION) $(LOG_DIR) & \
+	wait
+
+collect-stats:
+	@if [ -z "$(RPS)" ]; then \
+		echo "usage: make collect-stats RPS=50" >&2; \
+		exit 1; \
+	fi
+	./scripts/collect_stats.sh $(RPS)

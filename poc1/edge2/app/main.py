@@ -5,7 +5,7 @@ from urllib.parse import unquote
 from minio import Minio
 from usecase.aligmnent_usecase import AligmentUsecase
 import open3d as o3d
-import os, asyncio, tempfile, secrets
+import os, asyncio, tempfile, secrets, threading, time
 from usecase.batch_usecase import BatchUsecase
 from usecase.stream_usecase import StreamUsecase
 from datetime import timezone, datetime
@@ -97,18 +97,21 @@ class  PyroscopeRoute ( APIRoute ):
 api_router = APIRouter(prefix= "" , route_class=PyroscopeRoute) 
 
 @app.on_event("startup")
-async def _start_sync():
-    app.state.sync_task = asyncio.create_task(BatchUsecase(mc, mc_cloud).periodic_sync_loop())
+def _start_sync():
+    # バッチ同期を同期関数として別スレッドで起動
+    th = threading.Thread(
+        target=BatchUsecase(mc, mc_cloud).periodic_sync_loop,
+        name="batch-sync",
+        daemon=True,
+    )
+    th.start()
+    app.state.sync_thread = th
 
 @app.on_event("shutdown")
-async def _stop_sync():
-    task = getattr(app.state, "sync_task", None)
-    if task:
-        task.cancel()
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
+def _stop_sync():
+    th = getattr(app.state, "sync_thread", None)
+    if th and th.is_alive():
+        th.join(timeout=1)
         
 def handle_record_sync(rec, mc: Minio, request_id: str, start_time: int):
     with pyroscope.tag_wrapper({"endpoint": "POST:/minio/webhook", "job": "handle_record_sync"}):
@@ -164,61 +167,85 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     records = body.get("Records", [body]) if isinstance(body, dict) else []
     for rec in records:
-        background.add_task(handle_record_sync, rec, mc, request_id, start_time)
+        background.add_task(asyncio.to_thread, handle_record_sync, rec, mc, request_id, start_time)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+def _log_stream_iter(body_iter, name: str):
+    # Stream the response body while tracking retention for the full streaming window
+    def _generator():
+        with log_duration(name):
+            for chunk in body_iter:
+                yield chunk
+    return _generator()
+
+def _log_stream_total(body_iter, name: str, start_ts: float):
+    def _generator():
+        try:
+            for chunk in body_iter:
+                yield chunk
+        finally:
+            elapsed_ms = (time.perf_counter() - start_ts) * 1000.0
+            logger.info("processed_time_%s: %.3f", name, elapsed_ms)
+    return _generator()
+
 @api_router.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
+    request_start = time.perf_counter()
     # ユースケース：まずエッジMinIOを探し、無ければクラウドAPI(HTTP)へフォールバック
     # obj: 本体(ファイルライク/HTTPストリーム), st: メタ情報(MinIO Stat or HTTPヘッダdict)
     # source/bucket/key: デバッグ・トレース用メタ
     obj, st, source, bucket, key = StreamUsecase(mc, mc_cloud, geohash).stream()
+    
+    with log_duration("stream.prepare_header"):
+        # --- Last-Modified を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
+        lm = getattr(st, "last_modified", None) or (st.get("Last-Modified") if isinstance(st, dict) else None)
+        # 文字列（HTTPヘッダ）の場合は datetime へパース
+        if isinstance(lm, str):
+            try:
+                lm = parsedate_to_datetime(lm)
+            except Exception:
+                lm = None
+        # 値が無ければ現在UTC、TZ無しならUTCを付与
+        if lm is None:
+            lm = datetime.now(timezone.utc)
+        elif lm.tzinfo is None:
+            lm = lm.replace(tzinfo=timezone.utc)
+    
+        # --- Content-Length を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
+        size_val = getattr(st, "size", None)
+        if size_val is None and isinstance(st, dict):
+            cl = st.get("Content-Length")
+            size_val = int(cl) if cl and cl.isdigit() else None  # 数値にできない場合は未設定（チャンク配信）
 
-    # --- Last-Modified を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
-    lm = getattr(st, "last_modified", None) or (st.get("Last-Modified") if isinstance(st, dict) else None)
-    # 文字列（HTTPヘッダ）の場合は datetime へパース
-    if isinstance(lm, str):
-        try:
-            lm = parsedate_to_datetime(lm)
-        except Exception:
-            lm = None
-    # 値が無ければ現在UTC、TZ無しならUTCを付与
-    if lm is None:
-        lm = datetime.now(timezone.utc)
-    elif lm.tzinfo is None:
-        lm = lm.replace(tzinfo=timezone.utc)
-
-    # --- Content-Length を統一して取り出す（MinIO属性 or HTTPヘッダ） ---
-    size_val = getattr(st, "size", None)
-    if size_val is None and isinstance(st, dict):
-        cl = st.get("Content-Length")
-        size_val = int(cl) if cl and cl.isdigit() else None  # 数値にできない場合は未設定（チャンク配信）
-
-    # --- 応答ヘッダを組み立て（取得元をカスタムヘッダで可視化） ---
-    headers = {
-        **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),  # 分かるときだけ付与
-        "Last-Modified": lm.strftime("%a, %d %b %Y %H:%M:%S GMT"),  # RFC1123
-        "Content-Disposition": f'attachment; filename="{geohash}.ply"',  # ダウンロード名
-        "X-Pointcloud-Source": source,  # edge / cloud-http
-        "X-Pointcloud-Bucket": bucket,
-        "X-Pointcloud-Key": key,
-    }
+        # --- 応答ヘッダを組み立て（取得元をカスタムヘッダで可視化） ---
+        headers = {
+            **({"Content-Length": str(size_val)} if isinstance(size_val, int) else {}),  # 分かるときだけ付与
+            "Last-Modified": lm.strftime("%a, %d %b %Y %H:%M:%S GMT"),  # RFC1123
+            "Content-Disposition": f'attachment; filename="{geohash}.ply"',  # ダウンロード名
+            "X-Pointcloud-Source": source,  # edge / cloud-http
+            "X-Pointcloud-Bucket": bucket,
+            "X-Pointcloud-Key": key,
+        }
 
     # --- 本体のストリームを最小分岐で生成（メモリに載せず転送） ---
-    chunk = 32 * 1024  # 32KB チャンク
-    if hasattr(obj, "stream"):
-        # MinIOオブジェクト（.stream が提供される）
-        body_iter = obj.stream(chunk)
-    elif hasattr(obj, "iter_content"):
-        # requests.Response（HTTP経由）
-        body_iter = obj.iter_content(chunk_size=chunk)
-    elif hasattr(obj, "read"):
-        # urllib3 の raw など read() しかない場合
-        body_iter = iter(lambda: obj.read(chunk), b"")
-    else:
-        # 想定外の型
-        raise HTTPException(status_code=502, detail="unsupported stream body object")
+    with log_duration("stream.prepare_iterator"):
+        chunk_size = 32 * 1024  # 32KB チャンク
+        if hasattr(obj, "stream"):
+            # MinIOオブジェクト（.stream が提供される）
+            body_iter = obj.stream(chunk_size)
+        elif hasattr(obj, "iter_content"):
+            # requests.Response（HTTP経由）
+            body_iter = obj.iter_content(chunk_size=chunk_size)
+        elif hasattr(obj, "read"):
+            # urllib3 の raw など read() しかない場合
+            body_iter = iter(lambda: obj.read(chunk_size), b"")
+        else:
+            # 想定外の型
+            raise HTTPException(status_code=502, detail="unsupported stream body object")
+
+    body_iter = _log_stream_iter(body_iter, f"stream.body[{source}]")
+    body_iter = _log_stream_total(body_iter, "stream.endpoint_ms", request_start)
 
     # --- StreamingResponse で逐次返却。送信完了後に close（あれば）を実行 ---
     return StreamingResponse(

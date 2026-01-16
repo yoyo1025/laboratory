@@ -1,0 +1,45 @@
+tadanoyousei@TYMM4 k6 % k6 run download.js 
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: download.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_fetch: 130.00 iterations/s for 1m0s (maxVUs: 50-2000
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 7801    129.992224/s
+    checks_succeeded...: 100.00% 7801 out of 7801
+    checks_failed......: 0.00%   0 out of 7801
+
+    ✓ GET pointcloud succeeded or 404
+
+    HTTP
+    http_req_duration..............: avg=14.37ms min=7.87ms med=12.34ms max=93.12ms p(90)=20.3ms  p(95)=26.04ms
+      { expected_response:true }...: avg=14.37ms min=7.87ms med=12.34ms max=93.12ms p(90)=20.3ms  p(95)=26.04ms
+    http_req_failed................: 0.00%  0 out of 7801
+    http_reqs......................: 7801   129.992224/s
+
+    EXECUTION
+    iteration_duration.............: avg=14.52ms min=7.97ms med=12.48ms max=93.27ms p(90)=20.46ms p(95)=26.2ms 
+    iterations.....................: 7801   129.992224/s
+    vus............................: 2      min=1         max=3 
+    vus_max........................: 50     min=50        max=50
+
+    NETWORK
+    data_received..................: 5.9 GB 99 MB/s
+    data_sent......................: 694 kB 12 kB/s
+
+
+
+
+running (1m00.0s), 0000/0050 VUs, 7801 complete and 0 interrupted iterations
+pointcloud_fetch ✓ [===================] 0000/0050 VUs  1m0s  130.00 iters/s

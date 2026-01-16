@@ -1,0 +1,68 @@
+tadanoyousei@TYMM4 k6 % k6 run ./combined.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ./combined.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_upload: 100.00 iterations/s for 1m0s (maxVUs: 50-2000, exec: uploadScenario, gracefulStop: 5s)
+
+WARN[0010] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+WARN[0021] Request Failed                                error="Post \"http://localhost:8000/upload/prepare\": EOF"
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 11946  198.970527/s
+    checks_succeeded...: 99.98% 11944 out of 11946
+    checks_failed......: 0.01%  2 out of 11946
+
+    ✗ upload prepare succeeded
+      ↳  99% — ✓ 5972 / ✗ 2
+    ✓ point cloud upload succeeded
+
+    HTTP
+    http_req_duration..............: avg=43.92ms min=1.19ms med=20.5ms  max=1.09s p(90)=66.09ms  p(95)=143.73ms
+      { expected_response:true }...: avg=43.93ms min=5.37ms med=20.5ms  max=1.09s p(90)=66.09ms  p(95)=143.73ms
+    http_req_failed................: 0.01%  2 out of 11946
+    http_reqs......................: 11946  198.970527/s
+
+    EXECUTION
+    dropped_iterations.............: 27     0.449707/s
+    iteration_duration.............: avg=88.29ms min=1.4ms  med=42.46ms max=1.28s p(90)=137.12ms p(95)=395.18ms
+    iterations.....................: 5974   99.501919/s
+    vus............................: 4      min=3          max=75
+    vus_max........................: 77     min=50         max=77
+
+    NETWORK
+    data_received..................: 5.4 MB 90 kB/s
+    data_sent......................: 4.5 GB 76 MB/s
+
+
+
+
+running (1m00.0s), 0000/0077 VUs, 5974 complete and 0 interrupted iterations
+pointcloud_upload ✓ [======================================] 0000/0077 VUs  1m0s  100.00 iters/s
+
+tadanoyousei@TYMM4 poc1 % make count-ply     
+docker run --rm \
+          -v edge1-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge1-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+1961
+docker run --rm \
+          -v edge2-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge2-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+2014
+docker run --rm \
+          -v edge3-minio-data:/data \
+          alpine \
+          sh -c 'cd /data/edge3-point-cloud/xn1vqhzy/uploads && for d in *; do [ -d "$d" ] && echo "$d"; done | wc -l'
+1997

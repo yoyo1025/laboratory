@@ -1,31 +1,64 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
+const RPS = 170;
+const TIME_UNIT = `${1 / RPS}s`;
+
 export const options = {
   scenarios: {
     pointcloud_fetch: {
       executor: 'constant-arrival-rate',
       rate: 1,
-      timeUnit: '5s',
-      duration: '5m',
-      preAllocatedVUs: 2,
-      maxVUs: 5,
+      timeUnit: TIME_UNIT,
+      duration: '1m',
+      preAllocatedVUs: 50,
+      maxVUs: 2000,
+      gracefulStop: '5s',
     },
   },
 };
 
 const TARGETS = [
-  'http://localhost:8000/pointcloud/xn1vqhzy',
-  'http://localhost:8000/pointcloud/dummy111',
+  // edge1
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  // edge2
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  // edge3
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
 ];
 
-export default function () {
+export default function downloadScenario() {
   const target = TARGETS[Math.floor(Math.random() * TARGETS.length)];
   const res = http.get(target, { tags: { name: 'get_pointcloud' } });
 
   check(res, {
     'GET pointcloud succeeded or 404': (r) => [200, 404].includes(r.status),
   });
-
-  sleep(5);
 }

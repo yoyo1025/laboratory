@@ -3,6 +3,7 @@ services:
     build: .
     volumes:
       - ./app:/app
+      - ../data:/data
     ports:
       - "8000:8000"
     depends_on:
@@ -27,7 +28,7 @@ services:
       resources:
         limits:
           cpus: "1.5"
-          memory: "2.5GB"
+          memory: "2.5G"
     restart: always
   edge1-mysql:
     image: "mysql:8.0"
