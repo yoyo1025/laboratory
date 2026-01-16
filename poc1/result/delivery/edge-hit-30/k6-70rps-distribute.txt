@@ -1,4 +1,4 @@
-tadanoyousei@TYMM4 k6 % k6 run download.js 
+tadanoyousei@TYMM4 k6 % k6 run download.js
 
          /\      Grafana   /‾‾/  
     /\  /  \     |\  __   /  /   
@@ -17,27 +17,27 @@ tadanoyousei@TYMM4 k6 % k6 run download.js
 
   █ TOTAL RESULTS 
 
-    checks_total.......: 4200   69.998858/s
-    checks_succeeded...: 99.95% 4198 out of 4200
-    checks_failed......: 0.04%  2 out of 4200
+    checks_total.......: 4200    69.997887/s
+    checks_succeeded...: 100.00% 4200 out of 4200
+    checks_failed......: 0.00%   0 out of 4200
 
-    ✗ GET pointcloud succeeded or 404
-      ↳  99% — ✓ 4198 / ✗ 2
+    ✓ GET pointcloud succeeded or 404
 
     HTTP
-    http_req_duration....: avg=11.86ms min=4.99ms med=6.61ms max=10.01s p(90)=7.86ms p(95)=8.97ms
-    http_req_failed......: 100.00% 4200 out of 4200
-    http_reqs............: 4200    69.998858/s
+    http_req_duration..............: avg=13.46ms min=7.18ms med=12.64ms max=141.49ms p(90)=17.16ms p(95)=22.43ms
+      { expected_response:true }...: avg=13.46ms min=7.18ms med=12.64ms max=141.49ms p(90)=17.16ms p(95)=22.43ms
+    http_req_failed................: 0.00%  0 out of 4200
+    http_reqs......................: 4200   69.997887/s
 
     EXECUTION
-    iteration_duration...: avg=11.97ms min=5.69ms med=6.71ms max=10.01s p(90)=7.99ms p(95)=9.1ms 
-    iterations...........: 4200    69.998858/s
-    vus..................: 0       min=0            max=2 
-    vus_max..............: 50      min=50           max=50
+    iteration_duration.............: avg=13.6ms  min=7.32ms med=12.76ms max=141.64ms p(90)=17.34ms p(95)=22.61ms
+    iterations.....................: 4200   69.997887/s
+    vus............................: 1      min=0         max=2 
+    vus_max........................: 50     min=50        max=50
 
     NETWORK
-    data_received........: 773 kB  13 kB/s
-    data_sent............: 374 kB  6.2 kB/s
+    data_received..................: 2.1 GB 35 MB/s
+    data_sent......................: 374 kB 6.2 kB/s
 
 
 
