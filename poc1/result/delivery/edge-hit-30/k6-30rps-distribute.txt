@@ -17,29 +17,30 @@ tadanoyousei@TYMM4 k6 % k6 run download.js
 
   █ TOTAL RESULTS 
 
-    checks_total.......: 1801    30.012747/s
-    checks_succeeded...: 100.00% 1801 out of 1801
-    checks_failed......: 0.00%   0 out of 1801
+    checks_total.......: 1800    29.999504/s
+    checks_succeeded...: 100.00% 1800 out of 1800
+    checks_failed......: 0.00%   0 out of 1800
 
     ✓ GET pointcloud succeeded or 404
 
     HTTP
-    http_req_duration....: avg=7.95ms min=6.09ms med=7.44ms max=38.25ms p(90)=9.31ms p(95)=10.04ms
-    http_req_failed......: 100.00% 1801 out of 1801
-    http_reqs............: 1801    30.012747/s
+    http_req_duration..............: avg=12.78ms min=7.49ms med=13.05ms max=50.58ms p(90)=15.14ms p(95)=16.69ms
+      { expected_response:true }...: avg=12.78ms min=7.49ms med=13.05ms max=50.58ms p(90)=15.14ms p(95)=16.69ms
+    http_req_failed................: 0.00%  0 out of 1800
+    http_reqs......................: 1800   29.999504/s
 
     EXECUTION
-    iteration_duration...: avg=8.12ms min=6.18ms med=7.62ms max=38.51ms p(90)=9.5ms  p(95)=10.29ms
-    iterations...........: 1801    30.012747/s
-    vus..................: 0       min=0            max=0 
-    vus_max..............: 50      min=50           max=50
+    iteration_duration.............: avg=12.98ms min=7.6ms  med=13.24ms max=50.9ms  p(90)=15.34ms p(95)=16.93ms
+    iterations.....................: 1800   29.999504/s
+    vus............................: 0      min=0         max=0 
+    vus_max........................: 50     min=50        max=50
 
     NETWORK
-    data_received........: 331 kB  5.5 kB/s
-    data_sent............: 160 kB  2.7 kB/s
+    data_received..................: 884 MB 15 MB/s
+    data_sent......................: 160 kB 2.7 kB/s
 
 
 
 
-running (1m00.0s), 0000/0050 VUs, 1801 complete and 0 interrupted iterations
-pointcloud_fetch ✓ [===============] 0000/0050 VUs  1m0s  30.00 iters/s
+running (1m00.0s), 0000/0050 VUs, 1800 complete and 0 interrupted iterations
+pointcloud_fetch ✓ [======================================] 0000/0050 VUs  1m0s  30.00 iters/s
