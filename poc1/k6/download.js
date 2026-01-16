@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const RPS = 70;
+const RPS = 10;
 const TIME_UNIT = `${1 / RPS}s`;
 
 export const options = {
