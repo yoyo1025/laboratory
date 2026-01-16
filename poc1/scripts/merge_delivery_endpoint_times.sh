@@ -2,8 +2,8 @@
 set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-INDIR_SUFFIX="result/deliverly"
-OUTDIR="$BASE_DIR/result/delivery"
+INDIR_SUFFIX="result/deliverly/edge-hit-50"
+OUTDIR="$BASE_DIR/result/delivery/edge-hit-50"
 MODE="distribute"
 RPS_LIST=(10 30 50 70 90 110 130 150 170)
 

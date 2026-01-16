@@ -3,7 +3,7 @@ set -euo pipefail
 
 EDGE="${1:-}"
 RPS="${2:-}"
-OUTDIR_SUFFIX="${3:-result/deliverly}"
+OUTDIR_SUFFIX="${3:-result/deliverly/edge-hit-50}"
 
 if [ -z "$EDGE" ] || [ -z "$RPS" ]; then
   echo "usage: $0 EDGE RPS [OUTDIR_SUFFIX]" >&2
