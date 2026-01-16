@@ -13,7 +13,7 @@ BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 OUTDIR="$BASE_DIR/result/delivery"
 mkdir -p "$OUTDIR"
 
-OUT="$OUTDIR/container_stats_${RPS}rps_concentrate.csv"
+OUT="$OUTDIR/container_stats_${RPS}rps_distribute.csv"
 
 echo "elapsed_sec,container_name,cpu_percent,mem_used,mem_limit,mem_percent" > "$OUT"
 

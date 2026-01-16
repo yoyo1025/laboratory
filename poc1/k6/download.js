@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const RPS = 130;
+const RPS = 150;
 const TIME_UNIT = `${1 / RPS}s`;
 
 export const options = {
@@ -21,37 +21,37 @@ export const options = {
 const TARGETS = [
   // edge1
   'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/bbbbbbbb',
-  // 'http://localhost:8000/pointcloud/aaaaaaaa',
-  // 'http://localhost:8000/pointcloud/aaaaaaaa',
-  // 'http://localhost:8000/pointcloud/aaaaaaaa',
-  // // edge2
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/cccccccc',
-  // 'http://localhost:8001/pointcloud/aaaaaaaa',
-  // 'http://localhost:8001/pointcloud/aaaaaaaa',
-  // 'http://localhost:8001/pointcloud/aaaaaaaa',
-  // // edge3
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/dddddddd',
-  // 'http://localhost:8002/pointcloud/aaaaaaaa',
-  // 'http://localhost:8002/pointcloud/aaaaaaaa',
-  // 'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/aaaaaaaa',
+  // edge2
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/aaaaaaaa',
+  // edge3
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/aaaaaaaa',
 ];
 
 export default function downloadScenario() {
