@@ -10,7 +10,7 @@ if [ -z "$RPS" ]; then
 fi
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-OUTDIR="$BASE_DIR/result/delivery/edge-hit-50"
+OUTDIR="$BASE_DIR/result/delivery/edge-hit-30"
 mkdir -p "$OUTDIR"
 
 OUT="$OUTDIR/container_stats_${RPS}rps_distribute.csv"
