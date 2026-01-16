@@ -1,0 +1,48 @@
+tadanoyousei@TYMM4 k6 % k6 run download.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: download.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2000 max VUs, 1m5s max duration (incl. graceful stop):
+              * pointcloud_fetch: 150.00 iterations/s for 1m0s (maxVUs: 50-2000, gracefulStop: 5s)
+
+WARN[0038] Insufficient VUs, reached 2000 active VUs and cannot initialize more  executor=constant-arrival-rate scenario=pointcloud_fetch
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 3543    54.428977/s
+    checks_succeeded...: 100.00% 3543 out of 3543
+    checks_failed......: 0.00%   0 out of 3543
+
+    ✓ GET pointcloud succeeded or 404
+
+    HTTP
+    http_req_duration..............: avg=17.59s min=7.96ms med=20.06s max=38.37s p(90)=27.93s p(95)=35.91s
+      { expected_response:true }...: avg=17.59s min=7.96ms med=20.06s max=38.37s p(90)=27.93s p(95)=35.91s
+    http_req_failed................: 0.00%  0 out of 3543
+    http_reqs......................: 3543   54.428977/s
+
+    EXECUTION
+    dropped_iterations.............: 3917   60.174514/s
+    iteration_duration.............: avg=17.59s min=8.04ms med=20.06s max=38.37s p(90)=27.93s p(95)=35.91s
+    iterations.....................: 3543   54.428977/s
+    vus............................: 1540   min=72        max=2000
+    vus_max........................: 2000   min=73        max=2000
+
+    NETWORK
+    data_received..................: 2.2 GB 33 MB/s
+    data_sent......................: 452 kB 6.9 kB/s
+
+
+
+
+running (1m05.1s), 0000/2000 VUs, 3543 complete and 1540 interrupted iterations
+pointcloud_fetch ✓ [==============
