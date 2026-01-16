@@ -4,7 +4,8 @@ from minio.error import S3Error
 from fastapi import HTTPException
 from typing import Tuple
 import requests
-from logging_utils import log_duration
+import time
+from logging_utils import log_duration, logger, SERVER_START_TS
 
 LOCAL_BUCKET_DEFAULT = "edge1-point-cloud"
 CLOUD_BUCKET_DEFAULT = "cloud-point-cloud"
@@ -27,16 +28,33 @@ class StreamUsecase:
         obj = mc.get_object(bucket, key)
         return obj, st
 
+    def _log_retention(self, name: str, start: float, end: float) -> None:
+        start_since = int(start - SERVER_START_TS)
+        end_since = int(end - SERVER_START_TS)
+        logger.info(f"retention_{name},{start_since},1")
+        logger.info(f"retention_{name},{end_since},-1")
+
     def stream(self) -> Tuple[any, any, str, str, str]:
         # 1) edge (局所モデル)
         local_key = f"{self.geohash}/latest/{self.geohash}.ply"
+        start = time.perf_counter()
         try:
-            with log_duration("stream.edge_get"):
-                obj, st = self._try_get(self.mc_local, self.local_bucket, local_key)
-            return obj, st, "edge", self.local_bucket, local_key
+            obj, st = self._try_get(self.mc_local, self.local_bucket, local_key)
         except S3Error as e:
-            if not self._is_not_found(e):
+            end = time.perf_counter()
+            elapsed = end - start
+            if self._is_not_found(e):
+                self._log_retention("stream.edge_get_miss", start, end)
+                logger.info("processed_time_%s: %.5f", "stream.edge_get_miss", elapsed)
+            else:
+                self._log_retention("stream.edge_get_error", start, end)
                 raise HTTPException(status_code=502, detail=f"edge stat/get error: {e.code}")
+        else:
+            end = time.perf_counter()
+            elapsed = end - start
+            self._log_retention("stream.edge_get_hit", start, end)
+            logger.info("processed_time_%s: %.5f", "stream.edge_get_hit", elapsed)
+            return obj, st, "edge", self.local_bucket, local_key
 
         # 2) cloud (大域モデル) クラウド側のAPIへ問い合わせてストリーミング取得
         cloud_url = f"http://host.docker.internal:8100/pointcloud/{self.geohash}"

@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const RPS = 170;
+const RPS = 10;
 const TIME_UNIT = `${1 / RPS}s`;
 
 export const options = {
@@ -23,10 +23,10 @@ const TARGETS = [
   'http://localhost:8000/pointcloud/bbbbbbbb',
   'http://localhost:8000/pointcloud/bbbbbbbb',
   'http://localhost:8000/pointcloud/bbbbbbbb',
-  'http://localhost:8000/pointcloud/aaaaaaaa',
-  'http://localhost:8000/pointcloud/aaaaaaaa',
-  'http://localhost:8000/pointcloud/aaaaaaaa',
-  'http://localhost:8000/pointcloud/aaaaaaaa',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
+  'http://localhost:8000/pointcloud/bbbbbbbb',
   'http://localhost:8000/pointcloud/aaaaaaaa',
   'http://localhost:8000/pointcloud/aaaaaaaa',
   'http://localhost:8000/pointcloud/aaaaaaaa',
@@ -34,10 +34,10 @@ const TARGETS = [
   'http://localhost:8001/pointcloud/cccccccc',
   'http://localhost:8001/pointcloud/cccccccc',
   'http://localhost:8001/pointcloud/cccccccc',
-  'http://localhost:8001/pointcloud/aaaaaaaa',
-  'http://localhost:8001/pointcloud/aaaaaaaa',
-  'http://localhost:8001/pointcloud/aaaaaaaa',
-  'http://localhost:8001/pointcloud/aaaaaaaa',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
+  'http://localhost:8001/pointcloud/cccccccc',
   'http://localhost:8001/pointcloud/aaaaaaaa',
   'http://localhost:8001/pointcloud/aaaaaaaa',
   'http://localhost:8001/pointcloud/aaaaaaaa',
@@ -45,10 +45,10 @@ const TARGETS = [
   'http://localhost:8002/pointcloud/dddddddd',
   'http://localhost:8002/pointcloud/dddddddd',
   'http://localhost:8002/pointcloud/dddddddd',
-  'http://localhost:8002/pointcloud/aaaaaaaa',
-  'http://localhost:8002/pointcloud/aaaaaaaa',
-  'http://localhost:8002/pointcloud/aaaaaaaa',
-  'http://localhost:8002/pointcloud/aaaaaaaa',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
+  'http://localhost:8002/pointcloud/dddddddd',
   'http://localhost:8002/pointcloud/aaaaaaaa',
   'http://localhost:8002/pointcloud/aaaaaaaa',
   'http://localhost:8002/pointcloud/aaaaaaaa',
