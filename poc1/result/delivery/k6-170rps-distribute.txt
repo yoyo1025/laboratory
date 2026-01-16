@@ -1,4 +1,4 @@
-tadanoyousei@TYMM4 k6 % k6 run download.js
+¥tadanoyousei@TYMM4 k6 % k6 run download.js
 
          /\      Grafana   /‾‾/  
     /\  /  \     |\  __   /  /   
@@ -17,31 +17,31 @@ tadanoyousei@TYMM4 k6 % k6 run download.js
 
   █ TOTAL RESULTS 
 
-    checks_total.......: 7763    119.315333/s
-    checks_succeeded...: 100.00% 7763 out of 7763
-    checks_failed......: 0.00%   0 out of 7763
+    checks_total.......: 8815    135.612808/s
+    checks_succeeded...: 100.00% 8815 out of 8815
+    checks_failed......: 0.00%   0 out of 8815
 
     ✓ GET pointcloud succeeded or 404
 
     HTTP
-    http_req_duration..............: avg=5.42s min=11.15ms med=5.21s max=15.14s p(90)=12.46s p(95)=13.81s
-      { expected_response:true }...: avg=5.42s min=11.15ms med=5.21s max=15.14s p(90)=12.46s p(95)=13.81s
-    http_req_failed................: 0.00%  0 out of 7763
-    http_reqs......................: 7763   119.315333/s
+    http_req_duration..............: avg=4.26s min=8.39ms med=3.43s max=14.67s p(90)=10.58s p(95)=12.68s
+      { expected_response:true }...: avg=4.26s min=8.39ms med=3.43s max=14.67s p(90)=10.58s p(95)=12.68s
+    http_req_failed................: 0.00%  0 out of 8815
+    http_reqs......................: 8815   135.612808/s
 
     EXECUTION
-    dropped_iterations.............: 1646   25.298601/s
-    iteration_duration.............: avg=5.42s min=11.3ms  med=5.21s max=15.14s p(90)=12.46s p(95)=13.81s
-    iterations.....................: 7763   119.315333/s
-    vus............................: 796    min=53        max=1693
-    vus_max........................: 1694   min=54        max=1694
+    dropped_iterations.............: 1292   19.876545/s
+    iteration_duration.............: avg=4.26s min=8.49ms med=3.43s max=14.67s p(90)=10.58s p(95)=12.68s
+    iterations.....................: 8815   135.612808/s
+    vus............................: 99     min=13        max=1340
+    vus_max........................: 1342   min=50        max=1342
 
     NETWORK
-    data_received..................: 5.4 GB 83 MB/s
-    data_sent......................: 762 kB 12 kB/s
+    data_received..................: 5.7 GB 88 MB/s
+    data_sent......................: 793 kB 12 kB/s
 
 
 
 
-running (1m05.1s), 0000/1694 VUs, 7763 complete and 792 interrupted iterations
-pointcloud_fetch ✓ [==================] 0792/1694 VUs  1m0s  170.00 iters/s
+running (1m05.0s), 0000/1342 VUs, 8815 complete and 94 interrupted iterations
+pointcloud_fetch ✓ [===========================] 0094/1342 VUs  1m0s  170.00 iters/s
