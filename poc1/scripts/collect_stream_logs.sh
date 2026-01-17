@@ -1,35 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-EDGE="${1:-}"
+TARGET="${1:-}"
 RPS="${2:-}"
 OUTDIR_SUFFIX="${3:-result/deliverly/edge-hit-50}"
 
-if [ -z "$EDGE" ] || [ -z "$RPS" ]; then
-  echo "usage: $0 EDGE RPS [OUTDIR_SUFFIX]" >&2
+if [ -z "$TARGET" ] || [ -z "$RPS" ]; then
+  echo "usage: $0 cloud|edge1|edge2|edge3|1|2|3 RPS [OUTDIR_SUFFIX]" >&2
   exit 1
 fi
 
-case "$EDGE" in
-  1|2|3) ;;
-  *)
-    echo "EDGE must be 1, 2, or 3" >&2
-    exit 1
-    ;;
-esac
+EDGE_NUM=""
+ROLE_LABEL=""
+if [ "$TARGET" = "cloud" ]; then
+  ROLE_LABEL="cloud"
+else
+  case "$TARGET" in
+    1|edge1) EDGE_NUM="1" ;;
+    2|edge2) EDGE_NUM="2" ;;
+    3|edge3) EDGE_NUM="3" ;;
+    *)
+      echo "TARGET must be cloud, edge1, edge2, edge3, or 1-3" >&2
+      exit 1
+      ;;
+  esac
+  ROLE_LABEL="edge${EDGE_NUM}"
+fi
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-COMPOSE_FILE="$BASE_DIR/edge${EDGE}/compose.yml"
+if [ "$ROLE_LABEL" = "cloud" ]; then
+  COMPOSE_FILE="$BASE_DIR/cloud/compose.yml"
+  OUTDIR="$BASE_DIR/cloud/$OUTDIR_SUFFIX"
+  PROJECT="cloud"
+  SERVICE="cloud-api"
+else
+  COMPOSE_FILE="$BASE_DIR/edge${EDGE_NUM}/compose.yml"
+  OUTDIR="$BASE_DIR/edge${EDGE_NUM}/$OUTDIR_SUFFIX"
+  PROJECT="edge${EDGE_NUM}"
+  SERVICE="edge${EDGE_NUM}-api"
+fi
 if [ ! -f "$COMPOSE_FILE" ]; then
   echo "compose file not found: $COMPOSE_FILE" >&2
   exit 1
 fi
 
-OUTDIR="$BASE_DIR/edge${EDGE}/${OUTDIR_SUFFIX}"
 mkdir -p "$OUTDIR"
-
-PROJECT="edge${EDGE}"
-SERVICE="edge${EDGE}-api"
 
 COMPOSE_CMD=(${COMPOSE:-docker compose})
 LOG_ARGS=("${COMPOSE_CMD[@]}" -p "$PROJECT" -f "$COMPOSE_FILE" logs --no-color)
@@ -44,9 +59,9 @@ if [ -n "${UNTIL:-}" ]; then
 fi
 LOG_ARGS+=("$SERVICE")
 
-PROCESSED_OUT="$OUTDIR/delivery_times_edge${EDGE}_${RPS}rps_distribute.csv"
-RETENTION_OUT="$OUTDIR/retention_delivery_process_counts_edge${EDGE}_${RPS}rps_distribute.csv"
-ENDPOINT_OUT="$OUTDIR/endpoint_times_edge${EDGE}_${RPS}rps_distribute.csv"
+PROCESSED_OUT="$OUTDIR/delivery_times_${ROLE_LABEL}_${RPS}rps_distribute.csv"
+RETENTION_OUT="$OUTDIR/retention_delivery_process_counts_${ROLE_LABEL}_${RPS}rps_distribute.csv"
+ENDPOINT_OUT="$OUTDIR/endpoint_times_${ROLE_LABEL}_${RPS}rps_distribute.csv"
 
 : > "$PROCESSED_OUT"
 : > "$RETENTION_OUT"

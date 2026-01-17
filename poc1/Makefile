@@ -9,6 +9,7 @@
 	collect-stats
 
 COMPOSE ?= docker compose
+SERVER ?= $(EDGE)
 
 LOG_DIR ?= result/deliverly
 DURATION ?= 180
@@ -145,12 +146,17 @@ count-ply3:
 
 # ---- stream log/metrics collection ----
 collect-stream-logs:
-	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh $(EDGE) $(RPS) $(LOG_DIR)
+	@if [ -z "$(SERVER)" ] || [ -z "$(RPS)" ]; then \
+		echo "usage: make collect-stream-logs SERVER=cloud|edge1|edge2|edge3 RPS=70 [LOG_DIR=...]" >&2; \
+		exit 1; \
+	fi
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh $(SERVER) $(RPS) $(LOG_DIR)
 
 collect-stream-logs-all:
-	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 1 $(RPS) $(LOG_DIR)
-	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 2 $(RPS) $(LOG_DIR)
-	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh 3 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh cloud $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh edge1 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh edge2 $(RPS) $(LOG_DIR)
+	COMPOSE="$(COMPOSE)" SINCE="$(SINCE)" UNTIL="$(UNTIL)" ./scripts/collect_stream_logs.sh edge3 $(RPS) $(LOG_DIR)
 
 collect-stream-stats:
 	COMPOSE="$(COMPOSE)" INTERVAL=$(INTERVAL) ./scripts/collect_stream_stats.sh $(EDGE) $(RPS) $(DURATION) $(LOG_DIR)

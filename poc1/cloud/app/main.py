@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, status, BackgroundTasks, Response
 import os
 from urllib.parse import unquote
 import logging
+import time
 from minio import Minio
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask as StarletteBackgroundTask
@@ -20,6 +21,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 
 # Pyroscope 用ライブラリ
 import pyroscope
+from logging_utils import log_duration, logger
 
 app = FastAPI()
 
@@ -51,8 +53,8 @@ pyroscope.configure(
   server_address = "http://cloud-pyroscope:4040" , 
 ) 
 
-logger = logging.getLogger("uvicorn")
-logger.setLevel(logging.INFO)
+uvicorn_logger = logging.getLogger("uvicorn")
+uvicorn_logger.setLevel(logging.INFO)
     
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "cloud-minio:9100")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio_root")
@@ -87,30 +89,56 @@ async def PCLocalAlignmentHandler(request: Request, background: BackgroundTasks)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+def _log_stream_iter(body_iter, name: str):
+    # Stream the response body while tracking retention for the full streaming window
+    def _generator():
+        with log_duration(name):
+            for chunk in body_iter:
+                yield chunk
+    return _generator()
+
+def _log_stream_total(body_iter, name: str, start_ts: float):
+    def _generator():
+        try:
+            for chunk in body_iter:
+                yield chunk
+        finally:
+            elapsed_ms = (time.perf_counter() - start_ts) * 1000.0
+            logger.info("processed_time_%s: %.3f", name, elapsed_ms)
+    return _generator()
+
 @app.get("/pointcloud/{geohash}")
 def get_city_model(geohash: str):
+    request_start = time.perf_counter()
     key = f"{geohash}/latest/{geohash}.ply"
     obj, st = StreamUsecase(mc, key).stream()
     
-    # HTTPヘッダを整形
-    last_modified = st.last_modified
-    # MinIOのlast_modifiedはTZ付きdatetime想定
-    if last_modified.tzinfo is None:
-        last_modified = last_modified.replace(tzinfo=timezone.utc)
-    headers = {
-        "Content-Length": str(st.size),
-        "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "Content-Disposition": f'attachment; filename="{geohash}.ply"',
-    }
+    with log_duration("stream.prepare_header"):
+        # HTTPヘッダを整形
+        last_modified = st.last_modified
+        # MinIOのlast_modifiedはTZ付きdatetime想定
+        if last_modified.tzinfo is None:
+            last_modified = last_modified.replace(tzinfo=timezone.utc)
+        headers = {
+            "Content-Length": str(st.size),
+            "Last-Modified": last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "Content-Disposition": f'attachment; filename="{geohash}.ply"',
+        }
     
     def _close():
         try:
             obj.close()
         except Exception:
             pass
-        
+
+    with log_duration("stream.prepare_iterator"):
+        body_iter = obj.stream(32 * 1024)
+
+    body_iter = _log_stream_iter(body_iter, "stream.body[cloud]")
+    body_iter = _log_stream_total(body_iter, "stream.endpoint_ms", request_start)
+
     return StreamingResponse(
-        obj.stream(32 * 1024),
+        body_iter,
         media_type="application/octet-stream",
         headers=headers,
         background=StarletteBackgroundTask(_close),
